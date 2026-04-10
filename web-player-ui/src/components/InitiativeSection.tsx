@@ -21,6 +21,12 @@ export default function InitiativeSection({
   const roundStarted = gameState.roundState > 0;
   const hasInitiative = character.initiative !== null;
 
+  // Check if this player is the last one who hasn't set initiative
+  const othersWithInitiative = gameState.characters.filter(
+    (c) => c.id !== character.id && c.initiative !== null && c.initiative !== 0
+  );
+  const isLastToEnter = !hasInitiative && othersWithInitiative.length === gameState.characters.length - 1 && gameState.characters.length > 1;
+
   // Sort characters by initiative (ascending - lower goes first in Gloomhaven)
   const sortedCharacters = [...gameState.characters]
     .filter((c) => c.initiative !== null)
@@ -215,9 +221,29 @@ export default function InitiativeSection({
           0%, 100% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.85; transform: scale(1.02); }
         }
+
+        .initiative-nudge {
+          text-align: center;
+          padding: 0.5rem 0.75rem;
+          margin-bottom: 0.5rem;
+          border-radius: var(--border-radius-sm);
+          background: rgba(212, 169, 64, 0.15);
+          border: 1px solid rgba(212, 169, 64, 0.3);
+          color: var(--color-xp);
+          font-family: var(--font-condensed);
+          font-size: 0.85rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          animation: pulse 2s ease-in-out infinite;
+        }
       `}</style>
 
       <h3 className="initiative-section__heading">Initiative</h3>
+
+      {!roundStarted && isLastToEnter && (
+        <div className="initiative-nudge">Waiting on you!</div>
+      )}
 
       {/* Pre-round: input mode */}
       {!roundStarted && !hasInitiative && (
