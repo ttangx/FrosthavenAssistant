@@ -57,13 +57,14 @@ export default function InitiativeSection({
     <section className="initiative-section card" aria-label="Initiative">
       <style>{`
         .initiative-section__heading {
-          font-family: var(--font-condensed);
-          font-size: 0.85rem;
+          font-family: var(--font-display);
+          font-size: 0.9rem;
           font-weight: 700;
-          color: var(--color-text-muted);
+          color: var(--color-ice-light);
           text-transform: uppercase;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.12em;
           margin-bottom: 0.75rem;
+          text-shadow: 0 1px 3px rgba(0,0,0,0.4);
         }
 
         .initiative-input-group {
@@ -123,7 +124,7 @@ export default function InitiativeSection({
         .initiative-badge__label {
           font-family: var(--font-condensed);
           font-size: 0.8rem;
-          color: var(--color-text-muted);
+          color: var(--color-text);
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.06em;
@@ -135,9 +136,9 @@ export default function InitiativeSection({
 
         .turn-order__heading {
           font-family: var(--font-condensed);
-          font-size: 0.8rem;
+          font-size: 0.85rem;
           font-weight: 700;
-          color: var(--color-text-muted);
+          color: var(--color-text);
           text-transform: uppercase;
           letter-spacing: 0.08em;
           margin-bottom: 0.5rem;

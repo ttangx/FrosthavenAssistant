@@ -62,7 +62,9 @@ export default function CharacterSheet({
           position: relative;
           overflow: hidden;
           min-height: 72px;
-          background: url('/character-bar.png') center center / 100% 100% no-repeat;
+          background:
+            linear-gradient(90deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.35) 100%),
+            url('/character-bar.png') center center / 100% 100% no-repeat;
         }
 
         .character-header__portrait-bg {
@@ -100,18 +102,19 @@ export default function CharacterSheet({
           font-family: var(--font-fantasy);
           font-size: 1.5rem;
           font-weight: 400;
-          color: var(--color-text-bright);
+          color: #ffffff;
           letter-spacing: 0.04em;
-          text-shadow: 2px 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.08);
+          text-shadow: 0 0 8px rgba(0,0,0,0.8), 2px 2px 4px rgba(0,0,0,0.7), -1px -1px 2px rgba(0,0,0,0.5);
         }
 
         .character-header__class {
           font-family: var(--font-condensed);
-          font-size: 0.8rem;
-          color: var(--color-frost);
+          font-size: 0.85rem;
+          color: var(--color-ice-light);
           text-transform: uppercase;
           letter-spacing: 0.1em;
           font-weight: 600;
+          text-shadow: 0 0 6px rgba(0,0,0,0.8), 1px 1px 3px rgba(0,0,0,0.6);
         }
 
         .character-header__level {

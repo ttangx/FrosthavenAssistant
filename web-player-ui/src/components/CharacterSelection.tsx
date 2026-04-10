@@ -35,7 +35,7 @@ export default function CharacterSelection({
           font-family: var(--font-condensed);
           font-size: 0.85rem;
           font-weight: 500;
-          color: var(--color-text-muted);
+          color: var(--color-text);
           text-transform: uppercase;
           letter-spacing: 0.12em;
           margin-bottom: 0.25rem;

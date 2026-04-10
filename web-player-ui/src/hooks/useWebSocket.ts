@@ -59,6 +59,7 @@ export function useWebSocket({
       ws.onopen = () => {
         setIsConnected(true);
         reconnectCountRef.current = 0;
+        onErrorRef.current('');  // Clear any previous error
       };
 
       ws.onmessage = (event: MessageEvent) => {

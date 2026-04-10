@@ -35,13 +35,14 @@ export default function XPSection({
     <section className="xp-section card" aria-label="Experience">
       <style>{`
         .xp-section__heading {
-          font-family: var(--font-condensed);
-          font-size: 0.85rem;
+          font-family: var(--font-display);
+          font-size: 0.9rem;
           font-weight: 700;
-          color: var(--color-text-muted);
+          color: var(--color-ice-light);
           text-transform: uppercase;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.12em;
           margin-bottom: 0.75rem;
+          text-shadow: 0 1px 3px rgba(0,0,0,0.4);
         }
 
         .xp-bar {
