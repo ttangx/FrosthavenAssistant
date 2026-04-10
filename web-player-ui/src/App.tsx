@@ -124,15 +124,9 @@ function App() {
 
         {!gameState && (
           <div className="card" style={{ textAlign: 'center', marginTop: '2rem' }}>
-            <p>Connecting to server at {serverAddress}...</p>
-            <label>
-              Server address:{' '}
-              <input
-                type="text"
-                value={serverAddress}
-                onChange={(e) => setServerAddress(e.target.value)}
-              />
-            </label>
+            <p style={{ fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-text-muted)' }}>
+              {isConnected ? 'Waiting for game data...' : 'Connecting to server...'}
+            </p>
           </div>
         )}
       </div>
