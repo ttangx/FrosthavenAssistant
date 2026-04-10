@@ -34,19 +34,24 @@ export default function XPSection({
     <section className="xp-section card" aria-label="Experience">
       <style>{`
         .xp-section__heading {
-          font-size: 1rem;
+          font-family: var(--font-condensed);
+          font-size: 0.85rem;
           font-weight: 700;
-          color: var(--color-frost);
+          color: var(--color-text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
           margin-bottom: 0.75rem;
         }
 
         .xp-bar {
           width: 100%;
           height: 12px;
-          background: rgba(179, 223, 232, 0.3);
+          background: var(--color-panel-dark);
+          border: 1px solid var(--color-panel-border);
           border-radius: 999px;
           overflow: hidden;
           margin-bottom: 0.5rem;
+          box-shadow: var(--shadow-inset);
         }
 
         .xp-bar__fill {
@@ -58,20 +63,21 @@ export default function XPSection({
 
         .xp-display {
           text-align: center;
+          font-family: var(--font-condensed);
           font-size: 1.5rem;
           font-weight: 700;
-          color: var(--color-gray-dark);
+          color: var(--color-xp);
           margin-bottom: 0.75rem;
         }
 
         .xp-display__separator {
           font-weight: 400;
-          opacity: 0.5;
-          margin: 0 0.2rem;
+          opacity: 0.4;
+          margin: 0 0.15rem;
         }
 
         .xp-display__max {
-          opacity: 0.6;
+          opacity: 0.5;
           font-weight: 600;
         }
 
@@ -86,11 +92,12 @@ export default function XPSection({
           min-height: 44px;
           font-size: 1rem;
           font-weight: 700;
-          background: linear-gradient(135deg, var(--color-xp), #2980b9);
+          background: linear-gradient(180deg, var(--color-xp) 0%, var(--color-xp-dark) 100%);
+          color: var(--color-panel-dark);
         }
 
         .xp-quick-buttons button:hover {
-          background: linear-gradient(135deg, #2980b9, #21618c);
+          background: linear-gradient(180deg, #e0b850 0%, var(--color-xp) 100%);
         }
 
         .xp-custom-group {
@@ -115,11 +122,12 @@ export default function XPSection({
         .xp-custom-group button {
           min-width: 90px;
           font-size: 0.9rem;
-          background: linear-gradient(135deg, var(--color-xp), #2980b9);
+          background: linear-gradient(180deg, var(--color-xp) 0%, var(--color-xp-dark) 100%);
+          color: var(--color-panel-dark);
         }
 
         .xp-custom-group button:hover {
-          background: linear-gradient(135deg, #2980b9, #21618c);
+          background: linear-gradient(180deg, #e0b850 0%, var(--color-xp) 100%);
         }
       `}</style>
 

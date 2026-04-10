@@ -44,19 +44,24 @@ export default function HealthSection({
     <section className="health-section card" aria-label="Health">
       <style>{`
         .health-section__heading {
-          font-size: 1rem;
+          font-family: var(--font-condensed);
+          font-size: 0.85rem;
           font-weight: 700;
-          color: var(--color-frost);
+          color: var(--color-text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
           margin-bottom: 0.75rem;
         }
 
         .health-bar {
           width: 100%;
-          height: 16px;
-          background: rgba(179, 223, 232, 0.3);
+          height: 14px;
+          background: var(--color-panel-dark);
+          border: 1px solid var(--color-panel-border);
           border-radius: 999px;
           overflow: hidden;
           margin-bottom: 0.5rem;
+          box-shadow: var(--shadow-inset);
         }
 
         .health-bar__fill {
@@ -67,20 +72,21 @@ export default function HealthSection({
 
         .health-display {
           text-align: center;
+          font-family: var(--font-condensed);
           font-size: 2rem;
-          font-weight: 800;
-          color: var(--color-gray-dark);
+          font-weight: 700;
+          color: var(--color-text-bright);
           margin-bottom: 0.75rem;
         }
 
         .health-display__separator {
           font-weight: 400;
-          opacity: 0.5;
-          margin: 0 0.25rem;
+          opacity: 0.4;
+          margin: 0 0.15rem;
         }
 
         .health-display__max {
-          opacity: 0.6;
+          opacity: 0.5;
           font-weight: 600;
         }
 

@@ -38,46 +38,55 @@ export default function CharacterSheet({
         }
 
         .character-header__name {
-          font-size: 1.5rem;
-          font-weight: 800;
-          color: var(--color-frost);
-          letter-spacing: -0.02em;
+          font-family: var(--font-display);
+          font-size: 1.35rem;
+          font-weight: 700;
+          color: var(--color-text-bright);
+          letter-spacing: 0.02em;
         }
 
         .character-header__class {
-          font-size: 0.9rem;
-          color: var(--color-gray-dark);
-          opacity: 0.7;
+          font-family: var(--font-condensed);
+          font-size: 0.8rem;
+          color: var(--color-text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          font-weight: 500;
         }
 
         .character-header__level {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          min-width: 44px;
-          height: 44px;
+          min-width: 42px;
+          height: 42px;
           border-radius: 50%;
-          background: linear-gradient(135deg, var(--color-ice-dark), var(--color-frost));
-          color: var(--color-snow);
-          font-size: 1rem;
-          font-weight: 800;
-          box-shadow: 0 2px 8px rgba(44, 138, 168, 0.25);
+          background: linear-gradient(180deg, var(--color-ice-medium) 0%, var(--color-ice-dark) 100%);
+          border: 2px solid rgba(91, 189, 213, 0.4);
+          color: var(--color-text-bright);
+          font-family: var(--font-condensed);
+          font-size: 1.1rem;
+          font-weight: 700;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
         }
 
         .scenario-toggle {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 0.5rem;
+          gap: 0.4rem;
           width: 100%;
-          min-height: 44px;
-          padding: 0.5rem;
+          min-height: 36px;
+          padding: 0.4rem;
           background: transparent;
-          color: var(--color-frost);
-          font-size: 0.9rem;
-          font-weight: 600;
           border: none;
           box-shadow: none;
+          color: var(--color-text-muted);
+          font-family: var(--font-condensed);
+          font-size: 0.8rem;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
           cursor: pointer;
           margin-top: 0.25rem;
         }
@@ -85,7 +94,7 @@ export default function CharacterSheet({
         .scenario-toggle:hover {
           background: transparent;
           box-shadow: none;
-          opacity: 0.8;
+          color: var(--color-frost);
           transform: none;
         }
 
@@ -112,14 +121,18 @@ export default function CharacterSheet({
 
         .scenario-info__content {
           padding: 0.75rem;
-          background: rgba(255, 255, 255, 0.5);
+          background: var(--color-panel-dark);
           border-radius: var(--border-radius-sm);
+          border: 1px solid var(--color-panel-border);
         }
 
         .scenario-info__title {
-          font-size: 0.95rem;
+          font-family: var(--font-condensed);
+          font-size: 0.9rem;
           font-weight: 700;
           color: var(--color-frost);
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
           margin-bottom: 0.5rem;
         }
 
@@ -137,13 +150,14 @@ export default function CharacterSheet({
         }
 
         .scenario-info__label {
-          color: var(--color-gray-dark);
-          opacity: 0.7;
+          color: var(--color-text-muted);
+          font-family: var(--font-condensed);
         }
 
         .scenario-info__value {
           font-weight: 700;
-          color: var(--color-gray-dark);
+          color: var(--color-text);
+          font-family: var(--font-condensed);
         }
       `}</style>
 

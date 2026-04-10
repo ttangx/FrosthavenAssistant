@@ -57,9 +57,12 @@ export default function InitiativeSection({
     <section className="initiative-section card" aria-label="Initiative">
       <style>{`
         .initiative-section__heading {
-          font-size: 1rem;
+          font-family: var(--font-condensed);
+          font-size: 0.85rem;
           font-weight: 700;
-          color: var(--color-frost);
+          color: var(--color-text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
           margin-bottom: 0.75rem;
         }
 
@@ -72,12 +75,11 @@ export default function InitiativeSection({
 
         .initiative-input-group input[type='number'] {
           flex: 1;
+          font-family: var(--font-condensed);
           font-size: 2rem;
           font-weight: 700;
           text-align: center;
           min-height: 56px;
-          border: 2px solid var(--color-ice);
-          border-radius: var(--border-radius-sm);
           -moz-appearance: textfield;
         }
 
@@ -108,17 +110,22 @@ export default function InitiativeSection({
           width: 72px;
           height: 72px;
           border-radius: 50%;
-          background: linear-gradient(135deg, var(--color-ice-dark), var(--color-frost));
-          color: var(--color-snow);
+          background: linear-gradient(180deg, var(--color-ice-medium) 0%, var(--color-ice-dark) 100%);
+          border: 3px solid rgba(91, 189, 213, 0.4);
+          color: var(--color-text-bright);
+          font-family: var(--font-condensed);
           font-size: 2rem;
-          font-weight: 800;
-          box-shadow: 0 4px 12px rgba(44, 138, 168, 0.3);
+          font-weight: 700;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), inset 0 2px 0 rgba(255, 255, 255, 0.15);
         }
 
         .initiative-badge__label {
-          font-size: 0.9rem;
-          color: var(--color-gray-dark);
+          font-family: var(--font-condensed);
+          font-size: 0.8rem;
+          color: var(--color-text-muted);
           font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
         }
 
         .turn-order {
@@ -126,9 +133,12 @@ export default function InitiativeSection({
         }
 
         .turn-order__heading {
-          font-size: 0.9rem;
+          font-family: var(--font-condensed);
+          font-size: 0.8rem;
           font-weight: 700;
-          color: var(--color-gray-dark);
+          color: var(--color-text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
           margin-bottom: 0.5rem;
         }
 
@@ -145,20 +155,23 @@ export default function InitiativeSection({
           gap: 0.5rem;
           padding: 0.5rem 0.75rem;
           border-radius: var(--border-radius-sm);
+          font-family: var(--font-condensed);
           font-size: 0.9rem;
-          background: rgba(255, 255, 255, 0.5);
+          background: var(--color-panel-dark);
+          border: 1px solid transparent;
+          color: var(--color-text);
           transition: all var(--transition);
         }
 
         .turn-order__item--active {
-          background: linear-gradient(135deg, var(--color-ice-medium), var(--color-ice-dark));
-          color: var(--color-snow);
+          background: linear-gradient(135deg, var(--color-ice-dark), #1a6080);
+          color: var(--color-text-bright);
           font-weight: 700;
-          box-shadow: 0 2px 8px rgba(44, 138, 168, 0.2);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
         }
 
         .turn-order__item--self {
-          border: 2px solid var(--color-frost);
+          border: 1px solid var(--color-frost);
         }
 
         .turn-order__position {
@@ -192,8 +205,9 @@ export default function InitiativeSection({
         }
 
         .turn-indicator--waiting {
-          background: rgba(179, 223, 232, 0.3);
-          color: var(--color-gray-dark);
+          background: rgba(91, 189, 213, 0.1);
+          color: var(--color-text-muted);
+          border: 1px solid var(--color-panel-border);
         }
 
         @keyframes pulse {

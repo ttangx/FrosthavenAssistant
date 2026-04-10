@@ -1,21 +1,50 @@
-:root {
-  --color-ice-light: #e8f4f8;
-  --color-ice: #b3dfe8;
-  --color-ice-medium: #7ec9db;
-  --color-ice-dark: #4fa8c5;
-  --color-frost: #2c8aa8;
-  --color-snow: #ffffff;
-  --color-gray-dark: #3a4a54;
-  --color-damage: #e74c3c;
-  --color-healing: #27ae60;
-  --color-condition: #f39c12;
-  --color-xp: #3498db;
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Barlow+Condensed:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap');
 
-  --border-radius: 12px;
-  --border-radius-sm: 8px;
-  --shadow-card: 0 4px 16px rgba(44, 138, 168, 0.12);
-  --shadow-button: 0 2px 8px rgba(44, 138, 168, 0.18);
-  --transition: 0.2s ease;
+:root {
+  /* Core palette — dark fantasy board game */
+  --color-panel: #1c2a3a;
+  --color-panel-light: #243447;
+  --color-panel-dark: #121e2b;
+  --color-panel-border: rgba(120, 180, 210, 0.2);
+  --color-panel-glow: rgba(100, 170, 210, 0.08);
+
+  /* Ice / Frosthaven accents */
+  --color-ice-light: #c5e4ed;
+  --color-ice: #7ec9db;
+  --color-ice-medium: #4fa8c5;
+  --color-ice-dark: #2c8aa8;
+  --color-frost: #5bbdd5;
+
+  /* Background */
+  --color-bg: #8dbdce;
+  --color-bg-dark: #6a9fb3;
+
+  /* Text */
+  --color-text: #e4eff4;
+  --color-text-muted: #8aa8b8;
+  --color-text-bright: #ffffff;
+
+  /* Status colors */
+  --color-damage: #d94040;
+  --color-damage-dark: #a82e2e;
+  --color-healing: #38b060;
+  --color-healing-dark: #2a8a4a;
+  --color-xp: #d4a940;
+  --color-xp-dark: #b08820;
+  --color-condition: #e0a030;
+
+  /* Layout */
+  --border-radius: 6px;
+  --border-radius-sm: 4px;
+  --shadow-panel: 0 4px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-button: 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-inset: inset 0 2px 6px rgba(0, 0, 0, 0.25);
+  --transition: 0.15s ease;
+
+  /* Fonts */
+  --font-display: 'Cinzel', 'Times New Roman', serif;
+  --font-body: 'Barlow', -apple-system, sans-serif;
+  --font-condensed: 'Barlow Condensed', -apple-system, sans-serif;
 }
 
 *,
@@ -31,41 +60,68 @@ html {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  background: linear-gradient(135deg, var(--color-ice-light) 0%, var(--color-ice) 100%);
-  color: var(--color-gray-dark);
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(160, 210, 230, 0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(100, 170, 200, 0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(80, 140, 170, 0.3) 0%, transparent 50%);
+  color: var(--color-text);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle noise overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
 }
 
 #root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1;
 }
 
 .app {
   max-width: 480px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 0.75rem;
   width: 100%;
 }
 
-/* Card / frosted glass */
+/* ═══════════════════════════════════════════
+   CARD — dark panel with subtle glow border
+   ═══════════════════════════════════════════ */
 .card {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(179, 223, 232, 0.5);
+  background: var(--color-panel);
+  border: 1px solid var(--color-panel-border);
   border-radius: var(--border-radius);
-  box-shadow: var(--shadow-card);
-  padding: 1.25rem;
-  margin-bottom: 1rem;
+  box-shadow: var(--shadow-panel);
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  position: relative;
 }
 
-/* Buttons */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--border-radius);
+  background: linear-gradient(180deg, rgba(120, 180, 210, 0.04) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS — embossed game-style
+   ═══════════════════════════════════════════ */
 button,
 .btn {
   display: inline-flex;
@@ -74,63 +130,72 @@ button,
   min-height: 44px;
   min-width: 44px;
   padding: 0.5rem 1.25rem;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--border-radius-sm);
-  background: linear-gradient(135deg, var(--color-ice-medium), var(--color-ice-dark));
-  color: var(--color-snow);
-  font-size: 1rem;
+  background: linear-gradient(180deg, #3a5570 0%, #2a4055 100%);
+  color: var(--color-text);
+  font-family: var(--font-condensed);
+  font-size: 0.95rem;
   font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
   cursor: pointer;
   transition: all var(--transition);
-  box-shadow: var(--shadow-button);
+  box-shadow: var(--shadow-button), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   -webkit-tap-highlight-color: transparent;
 }
 
 button:hover,
 .btn:hover {
-  background: linear-gradient(135deg, var(--color-ice-dark), var(--color-frost));
-  box-shadow: 0 4px 12px rgba(44, 138, 168, 0.28);
-  transform: translateY(-1px);
+  background: linear-gradient(180deg, #4a6580 0%, #3a5570 100%);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 button:active,
 .btn:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 4px rgba(44, 138, 168, 0.18);
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 button:disabled,
 .btn:disabled {
-  opacity: 0.5;
+  opacity: 0.35;
   cursor: not-allowed;
   transform: none;
 }
 
 .btn-damage {
-  background: linear-gradient(135deg, var(--color-damage), #c0392b);
+  background: linear-gradient(180deg, var(--color-damage) 0%, var(--color-damage-dark) 100%);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .btn-damage:hover {
-  background: linear-gradient(135deg, #c0392b, #a93226);
+  background: linear-gradient(180deg, #e05050 0%, var(--color-damage) 100%);
 }
 
 .btn-healing {
-  background: linear-gradient(135deg, var(--color-healing), #1e8449);
+  background: linear-gradient(180deg, var(--color-healing) 0%, var(--color-healing-dark) 100%);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .btn-healing:hover {
-  background: linear-gradient(135deg, #1e8449, #196f3d);
+  background: linear-gradient(180deg, #45c070 0%, var(--color-healing) 100%);
 }
 
-/* Inputs */
+/* ═══════════════════════════════════════════
+   INPUTS — dark recessed fields
+   ═══════════════════════════════════════════ */
 input[type='text'],
 input[type='number'] {
   min-height: 44px;
   padding: 0.5rem 0.75rem;
-  border: 2px solid var(--color-ice);
+  border: 1px solid rgba(120, 180, 210, 0.2);
   border-radius: var(--border-radius-sm);
-  background: rgba(255, 255, 255, 0.85);
-  color: var(--color-gray-dark);
+  background: var(--color-panel-dark);
+  box-shadow: var(--shadow-inset);
+  color: var(--color-text);
+  font-family: var(--font-body);
   font-size: 1rem;
   transition: border-color var(--transition);
   width: 100%;
@@ -140,116 +205,58 @@ input[type='text']:focus,
 input[type='number']:focus {
   outline: none;
   border-color: var(--color-frost);
-  box-shadow: 0 0 0 3px rgba(44, 138, 168, 0.15);
+  box-shadow: var(--shadow-inset), 0 0 0 2px rgba(91, 189, 213, 0.15);
 }
 
-/* Badge / pill for conditions */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 32px;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  background: var(--color-condition);
-  color: var(--color-snow);
-  cursor: pointer;
-  transition: all var(--transition);
-  -webkit-tap-highlight-color: transparent;
+input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.5;
 }
 
-.badge:hover {
-  opacity: 0.85;
-}
-
-.badge--active {
-  background: var(--color-frost);
-  box-shadow: 0 0 0 2px var(--color-ice-dark);
-}
-
-.badge--inactive {
-  background: rgba(179, 223, 232, 0.5);
-  color: var(--color-gray-dark);
-}
-
-/* Status bar */
+/* ═══════════════════════════════════════════
+   STATUS BAR
+   ═══════════════════════════════════════════ */
 .status-bar {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.75rem;
   border-radius: var(--border-radius-sm);
-  font-size: 0.85rem;
+  font-family: var(--font-condensed);
+  font-size: 0.8rem;
   font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .status-bar--connected {
-  background: rgba(39, 174, 96, 0.15);
-  color: var(--color-healing);
+  background: rgba(56, 176, 96, 0.2);
+  color: #58d68d;
+  border: 1px solid rgba(56, 176, 96, 0.25);
 }
 
 .status-bar--disconnected {
-  background: rgba(231, 76, 60, 0.15);
-  color: var(--color-damage);
+  background: rgba(217, 64, 64, 0.2);
+  color: #ec7063;
+  border: 1px solid rgba(217, 64, 64, 0.25);
 }
 
-/* Utility classes */
-.text-center {
-  text-align: center;
-}
-
-.mt-1 {
-  margin-top: 0.5rem;
-}
-
-.mt-2 {
-  margin-top: 1rem;
-}
-
-.mb-1 {
-  margin-bottom: 0.5rem;
-}
-
-.mb-2 {
-  margin-bottom: 1rem;
-}
-
-.gap-1 {
-  gap: 0.5rem;
-}
-
-.flex {
-  display: flex;
-}
-
-.flex-wrap {
-  flex-wrap: wrap;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-/* Responsive */
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
 @media (max-width: 480px) {
   .app {
-    padding: 0.75rem;
+    padding: 0.5rem;
   }
 
   .card {
-    padding: 1rem;
+    padding: 0.85rem;
     border-radius: var(--border-radius-sm);
   }
 }
 
 @media (min-width: 768px) {
   .app {
-    max-width: 560px;
+    max-width: 540px;
   }
 }

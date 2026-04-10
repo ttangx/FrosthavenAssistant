@@ -15,30 +15,35 @@ export default function CharacterSelection({
         .character-selection {
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 0.75rem;
         }
 
         .character-selection__title {
           text-align: center;
-          font-size: 1.75rem;
+          font-family: var(--font-display);
+          font-size: 1.5rem;
           font-weight: 700;
-          color: var(--color-frost);
-          margin-bottom: 0.5rem;
-          letter-spacing: -0.02em;
+          color: var(--color-text-bright);
+          letter-spacing: 0.08em;
+          text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+          margin-bottom: 0;
         }
 
         .character-selection__subtitle {
           text-align: center;
-          font-size: 0.95rem;
-          color: var(--color-gray-dark);
-          opacity: 0.7;
-          margin-bottom: 0.5rem;
+          font-family: var(--font-condensed);
+          font-size: 0.85rem;
+          font-weight: 500;
+          color: var(--color-text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+          margin-bottom: 0.25rem;
         }
 
         .character-selection__list {
           display: flex;
           flex-direction: column;
-          gap: 0.75rem;
+          gap: 0.5rem;
         }
 
         .character-button {
@@ -46,55 +51,66 @@ export default function CharacterSelection({
           align-items: center;
           justify-content: space-between;
           width: 100%;
-          min-height: 72px;
-          padding: 1rem 1.25rem;
-          border: 2px solid transparent;
+          min-height: 64px;
+          padding: 0.75rem 1rem;
+          border: 1px solid rgba(120, 180, 210, 0.15);
           border-radius: var(--border-radius);
-          background: linear-gradient(135deg, var(--color-ice-medium), var(--color-ice-dark));
-          color: var(--color-snow);
+          background: linear-gradient(135deg, var(--color-panel-light) 0%, var(--color-panel) 100%);
+          color: var(--color-text);
           font-size: 1rem;
           font-weight: 600;
           cursor: pointer;
           transition: all var(--transition);
-          box-shadow: var(--shadow-button);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
           text-align: left;
+          text-transform: none;
+          letter-spacing: 0;
         }
 
         .character-button:hover {
           border-color: var(--color-frost);
-          background: linear-gradient(135deg, var(--color-ice-dark), var(--color-frost));
-          box-shadow: 0 4px 16px rgba(44, 138, 168, 0.32);
-          transform: translateY(-2px);
+          background: linear-gradient(135deg, #2e4a60 0%, var(--color-panel-light) 100%);
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 12px rgba(91, 189, 213, 0.1);
+          transform: translateY(-1px);
         }
 
         .character-button:active {
           transform: translateY(0);
-          box-shadow: 0 1px 4px rgba(44, 138, 168, 0.18);
         }
 
         .character-button__info {
           display: flex;
           flex-direction: column;
-          gap: 0.15rem;
+          gap: 0.1rem;
         }
 
         .character-button__name {
-          font-size: 1.15rem;
+          font-family: var(--font-display);
+          font-size: 1.05rem;
           font-weight: 700;
+          color: var(--color-text-bright);
         }
 
         .character-button__class {
-          font-size: 0.85rem;
-          opacity: 0.85;
-          font-weight: 400;
+          font-family: var(--font-condensed);
+          font-size: 0.8rem;
+          color: var(--color-text-muted);
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
         }
 
         .character-button__level {
-          font-size: 0.85rem;
+          font-family: var(--font-condensed);
+          font-size: 0.75rem;
           font-weight: 700;
-          background: rgba(255, 255, 255, 0.2);
-          padding: 0.25rem 0.65rem;
-          border-radius: 999px;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          background: rgba(91, 189, 213, 0.15);
+          border: 1px solid rgba(91, 189, 213, 0.25);
+          color: var(--color-frost);
+          padding: 0.25rem 0.6rem;
+          border-radius: var(--border-radius-sm);
           white-space: nowrap;
         }
 
@@ -104,37 +120,44 @@ export default function CharacterSelection({
         }
 
         .character-selection__waiting p {
-          font-size: 1.1rem;
-          color: var(--color-gray-dark);
+          font-family: var(--font-condensed);
+          font-size: 1rem;
+          color: var(--color-text-muted);
           margin-bottom: 1rem;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
         }
 
         .settings-toggle {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 0.5rem;
+          gap: 0.4rem;
           width: 100%;
-          min-height: 44px;
-          padding: 0.5rem;
+          min-height: 36px;
+          padding: 0.4rem;
           background: transparent;
-          color: var(--color-frost);
-          font-size: 0.9rem;
-          font-weight: 600;
           border: none;
           box-shadow: none;
+          color: var(--color-text-muted);
+          font-family: var(--font-condensed);
+          font-size: 0.8rem;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
           cursor: pointer;
         }
 
         .settings-toggle:hover {
           background: transparent;
           box-shadow: none;
-          opacity: 0.8;
+          color: var(--color-frost);
           transform: none;
         }
 
         .settings-toggle__arrow {
           transition: transform var(--transition);
+          font-size: 0.65rem;
         }
 
         .settings-toggle__arrow--open {
@@ -154,20 +177,23 @@ export default function CharacterSelection({
         }
 
         .settings-section__content {
-          padding: 0.75rem 0;
+          padding: 0.5rem 0;
         }
 
         .settings-section__label {
           display: block;
-          font-size: 0.85rem;
+          font-family: var(--font-condensed);
+          font-size: 0.75rem;
           font-weight: 600;
-          color: var(--color-gray-dark);
+          color: var(--color-text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
           margin-bottom: 0.35rem;
         }
       `}</style>
 
       <div className="card">
-        <h1 className="character-selection__title">Frosthaven Player UI</h1>
+        <h1 className="character-selection__title">X-Haven Assistant</h1>
         <p className="character-selection__subtitle">Select your character</p>
 
         {characters.length > 0 ? (

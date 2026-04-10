@@ -33,9 +33,12 @@ export default function StatusEffects({
     <section className="status-effects card" aria-label="Status Effects">
       <style>{`
         .status-effects__heading {
-          font-size: 1rem;
+          font-family: var(--font-condensed);
+          font-size: 0.85rem;
           font-weight: 700;
-          color: var(--color-frost);
+          color: var(--color-text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
           margin-bottom: 0.75rem;
         }
 
@@ -73,20 +76,21 @@ export default function StatusEffects({
         }
 
         .condition-badge--inactive {
-          background: rgba(179, 223, 232, 0.3);
-          color: var(--color-gray-dark);
+          background: var(--color-panel-dark);
+          color: var(--color-text-muted);
+          border: 1px solid var(--color-panel-border);
         }
 
         .condition-badge--inactive:hover {
-          background: rgba(179, 223, 232, 0.5);
-          border-color: var(--color-ice);
+          background: var(--color-panel-light);
+          border-color: rgba(91, 189, 213, 0.3);
         }
 
         .condition-badge--active {
-          background: var(--color-frost);
-          color: var(--color-snow);
-          border-color: var(--color-ice-dark);
-          box-shadow: 0 2px 8px rgba(44, 138, 168, 0.25);
+          background: linear-gradient(180deg, var(--color-ice-dark) 0%, #1a6080 100%);
+          color: var(--color-text-bright);
+          border-color: var(--color-frost);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 6px rgba(91, 189, 213, 0.2);
         }
 
         .condition-badge--active:hover {
