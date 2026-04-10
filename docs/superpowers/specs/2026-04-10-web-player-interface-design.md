@@ -197,6 +197,22 @@ Player opens web URL
 
 ---
 
+## Visual Design & Aesthetic
+
+**Theme:** Frosthaven ice aesthetic (cool tones, blues, whites, frosted glass effects)
+
+- **Color Palette:** Blues, whites, icy grays (match the Frosthaven theme in the Flutter app, not the dark red Gloomhaven theme)
+- **Background:** Cool-toned, possibly translucent/frosted glass effect on cards
+- **Text:** High contrast on cool backgrounds for readability
+- **Accents:** Icy blues and whites for interactive elements
+- **Typography:** Match the app's existing font choices where possible
+- **Cards/Sections:** Subtle borders or frosted appearance to separate UI regions
+- **Status Effects:** Color-coded badges (e.g., red for damage, blue for cold effects, etc.)
+
+The web UI should feel like a companion tool that visually belongs with the main Frosthaven app, not a generic web interface.
+
+---
+
 ## Real-Time Sync Behavior
 
 ### Normal Flow (Happy Path)
