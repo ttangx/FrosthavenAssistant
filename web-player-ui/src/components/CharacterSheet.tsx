@@ -46,28 +46,35 @@ export default function CharacterSheet({
         .character-header-card {
           padding: 0 !important;
           overflow: hidden;
+          clip-path: none;
+          border: none;
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+          background: none;
         }
+
+        .character-header-card::before { display: none; }
 
         .character-header {
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          padding: 1rem;
+          padding: 0.85rem 1rem;
           position: relative;
           overflow: hidden;
-          min-height: 80px;
+          min-height: 72px;
+          background: url('/character-bar.png') center center / 100% 100% no-repeat;
         }
 
         .character-header__portrait-bg {
           position: absolute;
-          right: -30px;
+          right: -20px;
           top: 50%;
           transform: translateY(-50%);
-          width: 180px;
-          height: 180px;
+          width: 160px;
+          height: 160px;
           object-fit: cover;
           object-position: top center;
-          opacity: 0.12;
+          opacity: 0.18;
           pointer-events: none;
           mask-image: radial-gradient(ellipse at center, black 20%, transparent 65%);
           -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 65%);
@@ -113,23 +120,30 @@ export default function CharacterSheet({
           justify-content: center;
           flex-direction: column;
           min-width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          background: linear-gradient(180deg, var(--color-ice-medium) 0%, var(--color-ice-dark) 100%);
-          border: 2px solid rgba(91, 189, 213, 0.5);
-          color: var(--color-text-bright);
-          font-family: var(--font-condensed);
-          font-size: 1.15rem;
-          font-weight: 700;
-          box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
           position: relative;
         }
 
-        /* Decorative bottom accent bar */
-        .character-header__accent {
-          height: 2px;
-          background: linear-gradient(90deg, transparent 5%, var(--color-gold-dim) 30%, var(--color-gold) 50%, var(--color-gold-dim) 70%, transparent 95%);
-          opacity: 0.6;
+        .character-header__level-crown {
+          width: 28px;
+          height: auto;
+          filter: brightness(2);
+          opacity: 0.8;
+        }
+
+        .character-header__level-number {
+          font-family: var(--font-condensed);
+          font-size: 1rem;
+          font-weight: 700;
+          color: var(--color-text-bright);
+          text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+          margin-top: -2px;
+        }
+
+        .frost-divider {
+          height: 6px;
+          background: url('/frosthaven-bar.png') center center / 100% 100% no-repeat;
+          opacity: 0.5;
+          margin: 0.5rem 0;
         }
 
         .scenario-toggle {
@@ -240,12 +254,14 @@ export default function CharacterSheet({
             <span className="character-header__name">{character.name}</span>
             <span className="character-header__class">{character.className}</span>
           </div>
-          <span className="character-header__level" title={`Level ${character.level}`}>
-            {character.level}
-          </span>
+          <div className="character-header__level" title={`Level ${character.level}`}>
+            <img className="character-header__level-crown" src="/icons/level-crown.png" alt="" />
+            <span className="character-header__level-number">{character.level}</span>
+          </div>
         </div>
-        <div className="character-header__accent" />
       </div>
+
+      <div className="frost-divider" />
 
       {/* Initiative */}
       <InitiativeSection

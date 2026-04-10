@@ -147,7 +147,7 @@ export default function XPSection({
       </div>
 
       <div className="xp-display">
-        <img src={getGeneralIcon('xp')} alt="" style={{ width: 28, height: 28, objectFit: 'contain', filter: 'brightness(3) invert(1)', marginRight: 4 }} />
+        <img src="/icons/xp-star.png" alt="" style={{ width: 24, height: 24, objectFit: 'contain', filter: 'brightness(1.5)', marginRight: 6 }} />
         <span>{xp}</span>
         <span className="xp-display__separator">/</span>
         <span className="xp-display__max">{maxXP}</span>
