@@ -120,12 +120,6 @@ export default function InitiativeSection({
           font-weight: 600;
         }
 
-        .initiative-badge__update-btn {
-          font-size: 0.85rem;
-          padding: 0.4rem 0.75rem;
-          min-height: 36px;
-        }
-
         .turn-order {
           margin-top: 0.75rem;
         }
@@ -243,18 +237,7 @@ export default function InitiativeSection({
               </div>
               <div className="initiative-badge__label">Your Initiative</div>
             </div>
-            <button
-              className="initiative-badge__update-btn"
-              onClick={() => {
-                setInputValue(String(character.initiative ?? ''));
-                // We need to clear initiative to show input. Instead, show inline input.
-              }}
-              disabled={!isConnected}
-            >
-              Update
-            </button>
           </div>
-          {/* Inline update input */}
           <div className="initiative-input-group">
             <input
               type="number"
@@ -263,9 +246,9 @@ export default function InitiativeSection({
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={String(character.initiative ?? '')}
+              placeholder="New value"
               disabled={!isConnected}
-              aria-label="New initiative value"
+              aria-label="Update initiative value"
             />
             <button
               onClick={handleSubmit}
