@@ -38,6 +38,7 @@ export interface CharacterSelectionProps {
   characters: Character[];
   onSelect: (characterId: string) => void;
   serverAddress: string;
+  onServerAddressChange: (address: string) => void;
 }
 
 export interface CharacterSheetProps {

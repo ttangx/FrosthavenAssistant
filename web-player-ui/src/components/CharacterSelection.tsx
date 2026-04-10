@@ -1,11 +1,4 @@
-import { Character } from '../types';
-
-interface CharacterSelectionProps {
-  characters: Character[];
-  onSelect: (characterId: string) => void;
-  serverAddress: string;
-  onServerAddressChange: (address: string) => void;
-}
+import type { CharacterSelectionProps } from '../types';
 
 export default function CharacterSelection({
   characters,
