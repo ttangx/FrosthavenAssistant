@@ -2,6 +2,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:frosthaven_assistant_server/command_processor.dart';
 import 'package:frosthaven_assistant_server/connection_health.dart';
 import 'package:frosthaven_assistant_server/game_server.dart';
 import 'package:frosthaven_assistant_server/server_state.dart';
@@ -17,6 +18,30 @@ class StandaloneServer extends GameServer {
   /// Use this to forward state to other listeners (e.g. WebSocket clients).
   void Function(String data)? onStateBroadcast;
 
+  /// Apply a web command to the current game state and broadcast the result.
+  /// Returns true if the command was applied successfully.
+  bool applyWebCommand(Map<String, dynamic> command, String description) {
+    final currentState = _state.gameSaveStates.isNotEmpty
+        ? _state.gameSaveStates.last!.getState()
+        : '';
+
+    final newState = applyCommand(command, currentState);
+    if (newState == null) {
+      return false;
+    }
+
+    // Save the new state (same path as TCP updateStateFromMessage)
+    _state.commandIndex++;
+    _state.commandDescriptions.insert(_state.commandIndex, description);
+    _state.save(newState);
+
+    // Broadcast to ALL clients (TCP + WebSocket via onStateBroadcast)
+    final message = "Index:${_state.commandIndex}Description:${description}GameState:${_state.gameSaveStates.last!.getState()}";
+    send(message);
+
+    print('Web command applied: $description (index: ${_state.commandIndex})');
+    return true;
+  }
 
   @override
   void addClientConnection(Socket client) {
