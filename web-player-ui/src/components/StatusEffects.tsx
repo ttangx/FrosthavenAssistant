@@ -1,4 +1,5 @@
 import type { Character } from '../types';
+import { getConditionColorIcon } from '../utils/classAssets';
 
 interface StatusEffectsProps {
   character: Character;
@@ -6,22 +7,22 @@ interface StatusEffectsProps {
   isConnected: boolean;
 }
 
-const CONDITIONS: { name: string; icon: string }[] = [
-  { name: 'poisoned', icon: '/icons/conditions/fh-poison-condition.png' },
-  { name: 'wounded', icon: '/icons/conditions/fh-wound-condition.png' },
-  { name: 'muddle', icon: '/icons/conditions/fh-muddle-condition.png' },
-  { name: 'immobilize', icon: '/icons/conditions/fh-immobilize-condition.png' },
-  { name: 'disarm', icon: '/icons/conditions/fh-disarm-condition.png' },
-  { name: 'stun', icon: '/icons/conditions/fh-stun-condition.png' },
-  { name: 'invisible', icon: '/icons/conditions/fh-invisible-condition.png' },
-  { name: 'strengthen', icon: '/icons/conditions/fh-strengthen-condition.png' },
-  { name: 'bless', icon: '/icons/conditions/fh-bless-condition.png' },
-  { name: 'curse', icon: '/icons/conditions/fh-curse-condition.png' },
-  { name: 'regenerate', icon: '/icons/conditions/fh-regenerate-condition.png' },
-  { name: 'ward', icon: '/icons/conditions/fh-ward-condition.png' },
-  { name: 'brittle', icon: '/icons/conditions/fh-brittle-condition.png' },
-  { name: 'bane', icon: '/icons/conditions/fh-bane-condition.png' },
-  { name: 'impair', icon: '/icons/conditions/fh-impair-condition.png' },
+const CONDITION_NAMES = [
+  'poisoned',
+  'wounded',
+  'muddle',
+  'immobilize',
+  'disarm',
+  'stun',
+  'invisible',
+  'strengthen',
+  'bless',
+  'curse',
+  'regenerate',
+  'ward',
+  'brittle',
+  'bane',
+  'impair',
 ];
 
 export default function StatusEffects({
@@ -106,7 +107,7 @@ export default function StatusEffects({
       <h3 className="status-effects__heading">Status Effects</h3>
 
       <div className="status-effects__grid">
-        {CONDITIONS.map(({ name, icon }) => {
+        {CONDITION_NAMES.map((name) => {
           const isActive = character.conditions.includes(name);
           return (
             <button
@@ -117,7 +118,7 @@ export default function StatusEffects({
               aria-pressed={isActive}
               aria-label={`${name}${isActive ? ' (active)' : ''}`}
             >
-              <img className="condition-badge__icon" src={icon} alt="" />
+              <img className="condition-badge__icon" src={getConditionColorIcon(name)} alt="" />
               {name}
             </button>
           );

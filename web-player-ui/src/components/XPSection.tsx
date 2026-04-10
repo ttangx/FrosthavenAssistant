@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Character } from '../types';
+import { getGeneralIcon } from '../utils/classAssets';
 
 interface XPSectionProps {
   character: Character;
@@ -131,7 +132,10 @@ export default function XPSection({
         }
       `}</style>
 
-      <h3 className="xp-section__heading">Experience</h3>
+      <h3 className="xp-section__heading">
+        <img src={getGeneralIcon('xp')} alt="" style={{ width: 18, height: 18, objectFit: 'contain', opacity: 0.6, filter: 'brightness(1.5)', verticalAlign: 'middle', marginRight: 6 }} />
+        Experience
+      </h3>
 
       <div className="xp-bar">
         <div

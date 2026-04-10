@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { CharacterSelectionProps } from '../types';
+import { getClassIcon } from '../utils/classAssets';
 
 export default function CharacterSelection({
   characters,
@@ -78,10 +79,20 @@ export default function CharacterSelection({
           transform: translateY(0);
         }
 
+        .character-button__icon {
+          width: 36px;
+          height: 36px;
+          object-fit: contain;
+          opacity: 0.7;
+          filter: brightness(1.8);
+          flex-shrink: 0;
+        }
+
         .character-button__info {
           display: flex;
           flex-direction: column;
           gap: 0.1rem;
+          flex: 1;
         }
 
         .character-button__name {
@@ -204,6 +215,11 @@ export default function CharacterSelection({
                 className="character-button"
                 onClick={() => onSelect(character.id)}
               >
+                <img
+                  className="character-button__icon"
+                  src={getClassIcon(character.className)}
+                  alt=""
+                />
                 <div className="character-button__info">
                   <span className="character-button__name">{character.name}</span>
                   <span className="character-button__class">{character.className}</span>

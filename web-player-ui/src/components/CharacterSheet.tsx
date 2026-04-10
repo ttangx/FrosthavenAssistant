@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { CharacterSheetProps } from '../types';
+import { getClassIcon, getClassPortrait } from '../utils/classAssets';
 import InitiativeSection from './InitiativeSection';
 import HealthSection from './HealthSection';
 import XPSection from './XPSection';
@@ -28,13 +29,39 @@ export default function CharacterSheet({
         .character-header {
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          gap: 0.75rem;
           margin-bottom: 0.25rem;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .character-header__portrait-bg {
+          position: absolute;
+          right: -20px;
+          top: -20px;
+          width: 140px;
+          height: 140px;
+          object-fit: cover;
+          opacity: 0.08;
+          pointer-events: none;
+          mask-image: radial-gradient(circle, black 30%, transparent 70%);
+          -webkit-mask-image: radial-gradient(circle, black 30%, transparent 70%);
+        }
+
+        .character-header__class-icon {
+          width: 40px;
+          height: 40px;
+          object-fit: contain;
+          opacity: 0.8;
+          filter: brightness(1.8);
+          flex-shrink: 0;
         }
 
         .character-header__info {
           display: flex;
           flex-direction: column;
+          flex: 1;
+          position: relative;
         }
 
         .character-header__name {
@@ -164,6 +191,16 @@ export default function CharacterSheet({
       {/* Character Header */}
       <div className="card">
         <div className="character-header">
+          <img
+            className="character-header__portrait-bg"
+            src={getClassPortrait(character.className)}
+            alt=""
+          />
+          <img
+            className="character-header__class-icon"
+            src={getClassIcon(character.className)}
+            alt=""
+          />
           <div className="character-header__info">
             <span className="character-header__name">{character.name}</span>
             <span className="character-header__class">{character.className}</span>
