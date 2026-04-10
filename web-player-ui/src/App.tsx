@@ -28,6 +28,14 @@ function App() {
     }
   }, []);
 
+  // Detect iOS Safari not in standalone mode (not added to Home Screen)
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    || ('standalone' in navigator && (navigator as any).standalone);
+  const [showIOSBanner, setShowIOSBanner] = useState(
+    () => isIOS && !isStandalone && !localStorage.getItem('ios-banner-dismissed')
+  );
+
   const {
     gameState,
     selectedCharacterId,
@@ -134,6 +142,40 @@ function App() {
       )}
       <div className="app">
         <ConnectionStatus isConnected={isConnected} error={error} />
+
+        {showIOSBanner && (
+          <div style={{
+            background: 'rgba(17, 28, 38, 0.92)',
+            border: '1px solid rgba(212, 169, 64, 0.3)',
+            borderRadius: '2px',
+            padding: '0.6rem 0.75rem',
+            marginBottom: '0.4rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontFamily: 'var(--font-condensed)',
+            fontSize: '0.8rem',
+            color: 'var(--color-text)',
+          }}>
+            <span style={{ flex: 1 }}>
+              Tap <strong style={{ fontSize: '1.1em' }}>&#x2191;</strong> then <strong>Add to Home Screen</strong> for notifications
+            </span>
+            <button
+              onClick={() => { setShowIOSBanner(false); localStorage.setItem('ios-banner-dismissed', '1'); }}
+              style={{
+                minHeight: '28px',
+                minWidth: '28px',
+                padding: '0.2rem 0.5rem',
+                fontSize: '0.75rem',
+                background: 'transparent',
+                border: '1px solid rgba(255,255,255,0.15)',
+                boxShadow: 'none',
+              }}
+            >
+              OK
+            </button>
+          </div>
+        )}
 
         {!selectedCharacter && gameState && (
           <CharacterSelection
