@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useGameState } from './hooks/useGameState';
+import { usePushSubscription } from './hooks/usePushSubscription';
 import { useWebSocket } from './hooks/useWebSocket';
 import { ServerStateMessage } from './types';
 import { getClassPortrait } from './utils/classAssets';
@@ -16,17 +17,6 @@ function App() {
       : window.location.host  // Served by Dart server on same port
   );
   const [error, setError] = useState<string | null>(null);
-
-  // Track whether we've asked for notification permission
-  const [notifPermission, setNotifPermission] = useState(
-    () => 'Notification' in window ? Notification.permission : 'denied'
-  );
-
-  const requestNotifications = useCallback(() => {
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission().then((p) => setNotifPermission(p));
-    }
-  }, []);
 
   // Detect iOS Safari not in standalone mode (not added to Home Screen)
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -69,6 +59,8 @@ function App() {
     onMismatch: handleMismatch,
     onError: handleError,
   });
+
+  usePushSubscription(send, isConnected, selectedCharacterId);
 
   const selectedCharacter = getSelectedCharacter();
 
@@ -180,7 +172,7 @@ function App() {
         {!selectedCharacter && gameState && (
           <CharacterSelection
             characters={gameState.characters}
-            onSelect={(id) => { requestNotifications(); selectCharacter(id); }}
+            onSelect={(id) => { selectCharacter(id); }}
             serverAddress={serverAddress}
             onServerAddressChange={setServerAddress}
           />
