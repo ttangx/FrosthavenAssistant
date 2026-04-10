@@ -73,12 +73,12 @@ export default function CharacterSheet({
         }
 
         .character-header__name {
-          font-family: var(--font-display);
-          font-size: 1.4rem;
-          font-weight: 700;
+          font-family: var(--font-fantasy);
+          font-size: 1.5rem;
+          font-weight: 400;
           color: var(--color-text-bright);
-          letter-spacing: 0.03em;
-          text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+          letter-spacing: 0.04em;
+          text-shadow: 2px 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.08);
         }
 
         .character-header__class {
@@ -110,9 +110,9 @@ export default function CharacterSheet({
 
         /* Decorative bottom accent bar */
         .character-header__accent {
-          height: 3px;
-          background: linear-gradient(90deg, transparent 5%, var(--color-frost) 30%, var(--color-frost) 70%, transparent 95%);
-          opacity: 0.5;
+          height: 2px;
+          background: linear-gradient(90deg, transparent 5%, var(--color-gold-dim) 30%, var(--color-gold) 50%, var(--color-gold-dim) 70%, transparent 95%);
+          opacity: 0.6;
         }
 
         .scenario-toggle {

@@ -21,12 +21,12 @@ export default function CharacterSelection({
 
         .character-selection__title {
           text-align: center;
-          font-family: var(--font-display);
-          font-size: 1.5rem;
-          font-weight: 700;
+          font-family: var(--font-fantasy);
+          font-size: 1.6rem;
+          font-weight: 400;
           color: var(--color-text-bright);
-          letter-spacing: 0.08em;
-          text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+          letter-spacing: 0.06em;
+          text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255,255,255,0.08);
           margin-bottom: 0;
         }
 
@@ -96,10 +96,11 @@ export default function CharacterSelection({
         }
 
         .character-button__name {
-          font-family: var(--font-display);
-          font-size: 1.05rem;
-          font-weight: 700;
+          font-family: var(--font-fantasy);
+          font-size: 1.1rem;
+          font-weight: 400;
           color: var(--color-text-bright);
+          text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
         }
 
         .character-button__class {
