@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'package:frosthaven_assistant_server/web_message_parser.dart';
