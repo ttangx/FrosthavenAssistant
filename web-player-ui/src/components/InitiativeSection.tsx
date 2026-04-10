@@ -19,7 +19,8 @@ export default function InitiativeSection({
 
   // roundState 0 = pre-draw (players inputting initiative), 1+ = cards drawn (turn order visible)
   const roundStarted = gameState.roundState > 0;
-  const hasInitiative = character.initiative !== null;
+  // Server sends 0 for "not set" — valid Gloomhaven initiatives are 1-99
+  const hasInitiative = character.initiative !== null && character.initiative !== 0;
 
   // Check if this player is the last one who hasn't set initiative
   const othersWithInitiative = gameState.characters.filter(
