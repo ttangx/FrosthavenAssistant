@@ -45,6 +45,20 @@ export default function InitiativeSection({
     }
   }, [roundStarted, hasInitiative]);
 
+  // Send browser notification when player is last to enter initiative
+  const notifiedRef = useRef(false);
+  useEffect(() => {
+    if (isLastToEnter && !notifiedRef.current) {
+      notifiedRef.current = true;
+      if (Notification.permission === 'granted') {
+        new Notification('Frosthaven', { body: 'Waiting on your initiative!' });
+      }
+    }
+    if (!isLastToEnter) {
+      notifiedRef.current = false;
+    }
+  }, [isLastToEnter]);
+
   const handleSubmit = () => {
     const parsed = parseInt(inputValue, 10);
     if (!isNaN(parsed) && parsed >= 0 && parsed <= 99) {

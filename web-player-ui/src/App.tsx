@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useGameState } from './hooks/useGameState';
 import { useWebSocket } from './hooks/useWebSocket';
 import { ServerStateMessage } from './types';
@@ -16,6 +16,13 @@ function App() {
       : window.location.host  // Served by Dart server on same port
   );
   const [error, setError] = useState<string | null>(null);
+
+  // Request notification permission once
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
 
   const {
     gameState,
