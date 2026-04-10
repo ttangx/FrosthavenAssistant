@@ -36,23 +36,23 @@ export default function XPSection({
       <style>{`
         .xp-section__heading {
           font-family: var(--font-display);
-          font-size: 0.9rem;
+          font-size: 0.8rem;
           font-weight: 700;
           color: var(--color-ice-light);
           text-transform: uppercase;
           letter-spacing: 0.12em;
-          margin-bottom: 0.75rem;
+          margin-bottom: 0.35rem;
           text-shadow: 0 1px 3px rgba(0,0,0,0.4);
         }
 
         .xp-bar {
           width: 100%;
-          height: 12px;
+          height: 8px;
           background: var(--color-panel-dark);
           border: 1px solid var(--color-panel-border);
           border-radius: 999px;
           overflow: hidden;
-          margin-bottom: 0.5rem;
+          margin-bottom: 0.35rem;
           box-shadow: var(--shadow-inset);
         }
 
@@ -68,10 +68,10 @@ export default function XPSection({
           align-items: center;
           justify-content: center;
           font-family: var(--font-display);
-          font-size: 1.5rem;
+          font-size: 1.2rem;
           font-weight: 700;
           color: var(--color-xp);
-          margin-bottom: 0.75rem;
+          margin-bottom: 0.35rem;
         }
 
         .xp-display__separator {
@@ -87,8 +87,8 @@ export default function XPSection({
 
         .xp-quick-buttons {
           display: flex;
-          gap: 0.5rem;
-          margin-bottom: 0.75rem;
+          gap: 0.35rem;
+          margin-bottom: 0.35rem;
         }
 
         .xp-quick-buttons button {

@@ -143,10 +143,10 @@ export default function CharacterSheet({
         }
 
         .frost-divider {
-          height: 6px;
+          height: 5px;
           background: url('/frosthaven-bar.png') center center / 100% 100% no-repeat;
           opacity: 0.5;
-          margin: 0.5rem 0;
+          margin: 0.2rem 0;
         }
 
         .scenario-toggle {

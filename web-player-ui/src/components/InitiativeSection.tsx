@@ -58,12 +58,12 @@ export default function InitiativeSection({
       <style>{`
         .initiative-section__heading {
           font-family: var(--font-display);
-          font-size: 0.9rem;
+          font-size: 0.8rem;
           font-weight: 700;
           color: var(--color-ice-light);
           text-transform: uppercase;
           letter-spacing: 0.12em;
-          margin-bottom: 0.75rem;
+          margin-bottom: 0.5rem;
           text-shadow: 0 1px 3px rgba(0,0,0,0.4);
         }
 
@@ -71,16 +71,15 @@ export default function InitiativeSection({
           display: flex;
           gap: 0.5rem;
           align-items: stretch;
-          margin-bottom: 0.5rem;
         }
 
         .initiative-input-group input[type='number'] {
           flex: 1;
           font-family: var(--font-condensed);
-          font-size: 2rem;
+          font-size: 1.5rem;
           font-weight: 700;
           text-align: center;
-          min-height: 56px;
+          min-height: 42px;
           -moz-appearance: textfield;
         }
 
@@ -91,39 +90,39 @@ export default function InitiativeSection({
         }
 
         .initiative-input-group button {
-          min-width: 100px;
-          font-size: 1rem;
-          min-height: 56px;
+          min-width: 80px;
+          font-size: 0.85rem;
+          min-height: 42px;
         }
 
         .initiative-badge {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 0.75rem;
-          margin-bottom: 0.75rem;
+          gap: 0.5rem;
+          margin-bottom: 0.4rem;
         }
 
         .initiative-badge__value {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 80px;
-          height: 80px;
+          width: 56px;
+          height: 56px;
           border-radius: 50%;
           background: radial-gradient(circle at 35% 35%, #5cc8e0 0%, var(--color-ice-dark) 60%, #1a5a72 100%);
-          border: 3px solid rgba(91, 189, 213, 0.5);
+          border: 2px solid rgba(91, 189, 213, 0.5);
           color: var(--color-text-bright);
           font-family: var(--font-display);
-          font-size: 2.2rem;
+          font-size: 1.6rem;
           font-weight: 900;
           text-shadow: 0 2px 4px rgba(0,0,0,0.4);
-          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0,0,0,0.3), inset 0 2px 0 rgba(255, 255, 255, 0.2), inset 0 -2px 4px rgba(0,0,0,0.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -2px 4px rgba(0,0,0,0.2);
         }
 
         .initiative-badge__label {
           font-family: var(--font-condensed);
-          font-size: 0.8rem;
+          font-size: 0.75rem;
           color: var(--color-text);
           font-weight: 600;
           text-transform: uppercase;

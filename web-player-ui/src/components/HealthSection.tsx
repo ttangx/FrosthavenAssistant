@@ -45,12 +45,12 @@ export default function HealthSection({
       <style>{`
         .health-section__heading {
           font-family: var(--font-display);
-          font-size: 0.9rem;
+          font-size: 0.8rem;
           font-weight: 700;
           color: var(--color-ice-light);
           text-transform: uppercase;
           letter-spacing: 0.12em;
-          margin-bottom: 0.75rem;
+          margin-bottom: 0.4rem;
           text-shadow: 0 1px 3px rgba(0,0,0,0.4);
         }
 
@@ -75,10 +75,10 @@ export default function HealthSection({
         .health-display {
           text-align: center;
           font-family: var(--font-display);
-          font-size: 2.2rem;
+          font-size: 1.8rem;
           font-weight: 900;
           color: var(--color-text-bright);
-          margin-bottom: 0.75rem;
+          margin-bottom: 0.4rem;
           text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
@@ -86,27 +86,27 @@ export default function HealthSection({
           font-weight: 400;
           opacity: 0.3;
           margin: 0 0.1rem;
-          font-size: 1.6rem;
+          font-size: 1.3rem;
         }
 
         .health-display__max {
           opacity: 0.45;
           font-weight: 700;
-          font-size: 1.6rem;
+          font-size: 1.3rem;
         }
 
         .health-quick-buttons {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 0.5rem;
-          margin-bottom: 0.75rem;
+          gap: 0.35rem;
+          margin-bottom: 0.4rem;
         }
 
         .health-quick-buttons button {
-          font-size: 1.1rem;
+          font-size: 1rem;
           font-weight: 700;
-          min-height: 48px;
-          padding: 0.5rem;
+          min-height: 38px;
+          padding: 0.35rem;
         }
 
         .health-exact {
