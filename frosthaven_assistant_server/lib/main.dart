@@ -27,12 +27,12 @@ void main() async {
     return server.applyWebCommand(command, description);
   };
 
-  // Start the HTTP/WebSocket server on port 80 for web browser clients.
+  // Start the HTTP/WebSocket server on port 8080 (Caddy reverse-proxies 80/443 here).
   late final HttpServer httpServer;
   try {
-    httpServer = await _startWebSocketServer(wsHandler, 80);
+    httpServer = await _startWebSocketServer(wsHandler, 8080);
   } catch (e) {
-    print('Failed to start WebSocket server on port 4568: $e');
+    print('Failed to start WebSocket server on port 8080: $e');
     exit(1);
   }
 
