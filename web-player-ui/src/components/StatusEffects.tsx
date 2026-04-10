@@ -6,22 +6,22 @@ interface StatusEffectsProps {
   isConnected: boolean;
 }
 
-const CONDITIONS = [
-  'poisoned',
-  'wounded',
-  'muddle',
-  'immobilize',
-  'disarm',
-  'stun',
-  'invisible',
-  'strengthen',
-  'bless',
-  'curse',
-  'regenerate',
-  'ward',
-  'brittle',
-  'bane',
-  'impair',
+const CONDITIONS: { name: string; icon: string }[] = [
+  { name: 'poisoned', icon: '/icons/conditions/fh-poison-condition.png' },
+  { name: 'wounded', icon: '/icons/conditions/fh-wound-condition.png' },
+  { name: 'muddle', icon: '/icons/conditions/fh-muddle-condition.png' },
+  { name: 'immobilize', icon: '/icons/conditions/fh-immobilize-condition.png' },
+  { name: 'disarm', icon: '/icons/conditions/fh-disarm-condition.png' },
+  { name: 'stun', icon: '/icons/conditions/fh-stun-condition.png' },
+  { name: 'invisible', icon: '/icons/conditions/fh-invisible-condition.png' },
+  { name: 'strengthen', icon: '/icons/conditions/fh-strengthen-condition.png' },
+  { name: 'bless', icon: '/icons/conditions/fh-bless-condition.png' },
+  { name: 'curse', icon: '/icons/conditions/fh-curse-condition.png' },
+  { name: 'regenerate', icon: '/icons/conditions/fh-regenerate-condition.png' },
+  { name: 'ward', icon: '/icons/conditions/fh-ward-condition.png' },
+  { name: 'brittle', icon: '/icons/conditions/fh-brittle-condition.png' },
+  { name: 'bane', icon: '/icons/conditions/fh-bane-condition.png' },
+  { name: 'impair', icon: '/icons/conditions/fh-impair-condition.png' },
 ];
 
 export default function StatusEffects({
@@ -49,16 +49,27 @@ export default function StatusEffects({
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          min-height: 36px;
+          gap: 0.35rem;
+          min-height: 44px;
           padding: 0.3rem 0.75rem;
           border-radius: 999px;
-          font-size: 0.8rem;
+          font-size: 0.75rem;
           font-weight: 600;
           cursor: pointer;
           transition: all var(--transition);
           -webkit-tap-highlight-color: transparent;
           border: 2px solid transparent;
           text-transform: capitalize;
+        }
+
+        .condition-badge__icon {
+          width: 22px;
+          height: 22px;
+          object-fit: contain;
+        }
+
+        .condition-badge--inactive .condition-badge__icon {
+          opacity: 0.5;
         }
 
         .condition-badge--inactive {
@@ -91,18 +102,19 @@ export default function StatusEffects({
       <h3 className="status-effects__heading">Status Effects</h3>
 
       <div className="status-effects__grid">
-        {CONDITIONS.map((condition) => {
-          const isActive = character.conditions.includes(condition);
+        {CONDITIONS.map(({ name, icon }) => {
+          const isActive = character.conditions.includes(name);
           return (
             <button
-              key={condition}
+              key={name}
               className={`condition-badge ${isActive ? 'condition-badge--active' : 'condition-badge--inactive'}`}
-              onClick={() => onToggleCondition(condition)}
+              onClick={() => onToggleCondition(name)}
               disabled={!isConnected}
               aria-pressed={isActive}
-              aria-label={`${condition}${isActive ? ' (active)' : ''}`}
+              aria-label={`${name}${isActive ? ' (active)' : ''}`}
             >
-              {condition}
+              <img className="condition-badge__icon" src={icon} alt="" />
+              {name}
             </button>
           );
         })}

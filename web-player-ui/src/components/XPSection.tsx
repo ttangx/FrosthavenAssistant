@@ -75,32 +75,50 @@ export default function XPSection({
           font-weight: 600;
         }
 
-        .xp-input-group {
+        .xp-quick-buttons {
+          display: flex;
+          gap: 0.5rem;
+          margin-bottom: 0.75rem;
+        }
+
+        .xp-quick-buttons button {
+          flex: 1;
+          min-height: 44px;
+          font-size: 1rem;
+          font-weight: 700;
+          background: linear-gradient(135deg, var(--color-xp), #2980b9);
+        }
+
+        .xp-quick-buttons button:hover {
+          background: linear-gradient(135deg, #2980b9, #21618c);
+        }
+
+        .xp-custom-group {
           display: flex;
           gap: 0.5rem;
           align-items: stretch;
         }
 
-        .xp-input-group input[type='number'] {
+        .xp-custom-group input[type='number'] {
           flex: 1;
           text-align: center;
           font-size: 1rem;
           -moz-appearance: textfield;
         }
 
-        .xp-input-group input[type='number']::-webkit-outer-spin-button,
-        .xp-input-group input[type='number']::-webkit-inner-spin-button {
+        .xp-custom-group input[type='number']::-webkit-outer-spin-button,
+        .xp-custom-group input[type='number']::-webkit-inner-spin-button {
           -webkit-appearance: none;
           margin: 0;
         }
 
-        .xp-input-group button {
+        .xp-custom-group button {
           min-width: 90px;
           font-size: 0.9rem;
           background: linear-gradient(135deg, var(--color-xp), #2980b9);
         }
 
-        .xp-input-group button:hover {
+        .xp-custom-group button:hover {
           background: linear-gradient(135deg, #2980b9, #21618c);
         }
       `}</style>
@@ -120,22 +138,27 @@ export default function XPSection({
         <span className="xp-display__max">{maxXP}</span>
       </div>
 
-      <div className="xp-input-group">
+      <div className="xp-quick-buttons">
+        <button onClick={() => onAddXP(1)} disabled={!isConnected}>+1</button>
+        <button onClick={() => onAddXP(2)} disabled={!isConnected}>+2</button>
+      </div>
+
+      <div className="xp-custom-group">
         <input
           type="number"
           min={1}
           value={xpAmount}
           onChange={(e) => setXpAmount(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Amount"
+          placeholder="Custom"
           disabled={!isConnected}
-          aria-label="XP amount to add"
+          aria-label="Custom XP amount"
         />
         <button
           onClick={handleAddXP}
           disabled={!isConnected || xpAmount === ''}
         >
-          Add XP
+          Add
         </button>
       </div>
     </section>
