@@ -5,6 +5,7 @@ import { ServerStateMessage } from './types';
 import CharacterSelection from './components/CharacterSelection';
 import CharacterSheet from './components/CharacterSheet';
 import ConnectionStatus from './components/ConnectionStatus';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   const [serverAddress, setServerAddress] = useState('localhost:4568');
@@ -91,44 +92,46 @@ function App() {
   );
 
   return (
-    <div className="app">
-      <ConnectionStatus isConnected={isConnected} error={error} />
+    <ErrorBoundary>
+      <div className="app">
+        <ConnectionStatus isConnected={isConnected} error={error} />
 
-      {!selectedCharacter && gameState && (
-        <CharacterSelection
-          characters={gameState.characters}
-          onSelect={selectCharacter}
-          serverAddress={serverAddress}
-          onServerAddressChange={setServerAddress}
-        />
-      )}
+        {!selectedCharacter && gameState && (
+          <CharacterSelection
+            characters={gameState.characters}
+            onSelect={selectCharacter}
+            serverAddress={serverAddress}
+            onServerAddressChange={setServerAddress}
+          />
+        )}
 
-      {selectedCharacter && gameState && (
-        <CharacterSheet
-          character={selectedCharacter}
-          gameState={gameState}
-          onHealthChange={handleHealthChange}
-          onInitiativeSet={handleInitiativeSet}
-          onAddXP={handleAddXP}
-          onToggleCondition={handleToggleCondition}
-          isConnected={isConnected}
-        />
-      )}
+        {selectedCharacter && gameState && (
+          <CharacterSheet
+            character={selectedCharacter}
+            gameState={gameState}
+            onHealthChange={handleHealthChange}
+            onInitiativeSet={handleInitiativeSet}
+            onAddXP={handleAddXP}
+            onToggleCondition={handleToggleCondition}
+            isConnected={isConnected}
+          />
+        )}
 
-      {!gameState && (
-        <div className="card" style={{ textAlign: 'center', marginTop: '2rem' }}>
-          <p>Connecting to server at {serverAddress}...</p>
-          <label>
-            Server address:{' '}
-            <input
-              type="text"
-              value={serverAddress}
-              onChange={(e) => setServerAddress(e.target.value)}
-            />
-          </label>
-        </div>
-      )}
-    </div>
+        {!gameState && (
+          <div className="card" style={{ textAlign: 'center', marginTop: '2rem' }}>
+            <p>Connecting to server at {serverAddress}...</p>
+            <label>
+              Server address:{' '}
+              <input
+                type="text"
+                value={serverAddress}
+                onChange={(e) => setServerAddress(e.target.value)}
+              />
+            </label>
+          </div>
+        )}
+      </div>
+    </ErrorBoundary>
   );
 }
 
