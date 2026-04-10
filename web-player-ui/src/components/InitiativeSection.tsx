@@ -46,18 +46,23 @@ export default function InitiativeSection({
     }
   }, [roundStarted, hasInitiative]);
 
-  // Send browser notification when player is last to enter initiative
-  const notifiedRef = useRef(false);
+  // Send repeating browser notification when player is last to enter initiative
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
-    if (isLastToEnter && !notifiedRef.current) {
-      notifiedRef.current = true;
-      if (Notification.permission === 'granted') {
-        new Notification('Frosthaven', { body: 'Waiting on your initiative!' });
+    if (isLastToEnter && Notification.permission === 'granted') {
+      // Fire immediately
+      new Notification('Frosthaven', { body: 'Waiting on your initiative!' });
+      // Then every 30 seconds
+      intervalRef.current = setInterval(() => {
+        new Notification('Frosthaven', { body: 'Still waiting on your initiative!' });
+      }, 30000);
+    }
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
-    }
-    if (!isLastToEnter) {
-      notifiedRef.current = false;
-    }
+    };
   }, [isLastToEnter]);
 
   const handleSubmit = () => {
