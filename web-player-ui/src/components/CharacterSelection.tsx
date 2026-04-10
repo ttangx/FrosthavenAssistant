@@ -83,8 +83,8 @@ export default function CharacterSelection({
           width: 36px;
           height: 36px;
           object-fit: contain;
-          opacity: 0.7;
-          filter: brightness(1.8);
+          opacity: 1;
+          filter: brightness(2.5) contrast(0.9);
           flex-shrink: 0;
         }
 

@@ -63,8 +63,10 @@ export default function XPSection({
         }
 
         .xp-display {
-          text-align: center;
-          font-family: var(--font-condensed);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: var(--font-display);
           font-size: 1.5rem;
           font-weight: 700;
           color: var(--color-xp);
@@ -133,7 +135,7 @@ export default function XPSection({
       `}</style>
 
       <h3 className="xp-section__heading">
-        <img src={getGeneralIcon('xp')} alt="" style={{ width: 18, height: 18, objectFit: 'contain', opacity: 0.6, filter: 'brightness(1.5)', verticalAlign: 'middle', marginRight: 6 }} />
+        <img src={getGeneralIcon('xp')} alt="" style={{ width: 18, height: 18, objectFit: 'contain', opacity: 0.9, filter: 'brightness(2.5)', verticalAlign: 'middle', marginRight: 6 }} />
         Experience
       </h3>
 
@@ -145,6 +147,7 @@ export default function XPSection({
       </div>
 
       <div className="xp-display">
+        <img src={getGeneralIcon('xp')} alt="" style={{ width: 28, height: 28, objectFit: 'contain', filter: 'brightness(3) invert(1)', marginRight: 4 }} />
         <span>{xp}</span>
         <span className="xp-display__separator">/</span>
         <span className="xp-display__max">{maxXP}</span>

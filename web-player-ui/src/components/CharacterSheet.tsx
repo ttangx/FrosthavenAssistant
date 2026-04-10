@@ -24,6 +24,23 @@ export default function CharacterSheet({
           display: flex;
           flex-direction: column;
           gap: 0;
+          position: relative;
+        }
+
+        .character-sheet__bg-art {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 100vw;
+          max-width: 550px;
+          height: auto;
+          opacity: 0.14;
+          pointer-events: none;
+          z-index: -1;
+          mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+          -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+          filter: saturate(0.2);
         }
 
         .character-header-card {
@@ -60,8 +77,8 @@ export default function CharacterSheet({
           width: 44px;
           height: 44px;
           object-fit: contain;
-          opacity: 0.85;
-          filter: brightness(1.8) drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+          opacity: 1;
+          filter: brightness(2.5) contrast(0.9) drop-shadow(0 2px 4px rgba(0,0,0,0.4));
           flex-shrink: 0;
         }
 

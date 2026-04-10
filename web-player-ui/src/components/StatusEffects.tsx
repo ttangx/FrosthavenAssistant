@@ -70,15 +70,15 @@ export default function StatusEffects({
         }
 
         .condition-badge__icon {
-          width: 26px;
-          height: 26px;
+          width: 30px;
+          height: 30px;
           object-fit: contain;
-          filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+          filter: brightness(1.8) drop-shadow(0 1px 3px rgba(0,0,0,0.4));
         }
 
         .condition-badge--inactive .condition-badge__icon {
-          opacity: 0.4;
-          filter: saturate(0.3) drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+          opacity: 0.5;
+          filter: brightness(1.3) saturate(0.3) drop-shadow(0 1px 2px rgba(0,0,0,0.3));
         }
 
         .condition-badge--inactive {
@@ -101,7 +101,7 @@ export default function StatusEffects({
 
         .condition-badge--active .condition-badge__icon {
           opacity: 1;
-          filter: drop-shadow(0 0 4px rgba(91, 189, 213, 0.4)) drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+          filter: brightness(1.6) drop-shadow(0 0 5px rgba(91, 189, 213, 0.5)) drop-shadow(0 1px 2px rgba(0,0,0,0.3));
         }
 
         .condition-badge--active:hover {

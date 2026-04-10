@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { useGameState } from './hooks/useGameState';
 import { useWebSocket } from './hooks/useWebSocket';
 import { ServerStateMessage } from './types';
+import { getClassPortrait } from './utils/classAssets';
 import CharacterSelection from './components/CharacterSelection';
 import CharacterSheet from './components/CharacterSheet';
 import ConnectionStatus from './components/ConnectionStatus';
@@ -98,6 +99,26 @@ function App() {
 
   return (
     <ErrorBoundary>
+      {selectedCharacter && (
+        <img
+          src={getClassPortrait(selectedCharacter.className)}
+          alt=""
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '100vw',
+            maxWidth: '550px',
+            opacity: 0.12,
+            pointerEvents: 'none',
+            zIndex: 0,
+            filter: 'saturate(0.15)',
+            maskImage: 'radial-gradient(ellipse at center, black 25%, transparent 70%)',
+            WebkitMaskImage: 'radial-gradient(ellipse at center, black 25%, transparent 70%)',
+          }}
+        />
+      )}
       <div className="app">
         <ConnectionStatus isConnected={isConnected} error={error} />
 
