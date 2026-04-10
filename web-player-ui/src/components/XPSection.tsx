@@ -140,18 +140,9 @@ export default function XPSection({
         Experience
       </h3>
 
-      <div className="xp-bar">
-        <div
-          className="xp-bar__fill"
-          style={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}
-        />
-      </div>
-
       <div className="xp-display">
         <img src="/icons/xp-star.png" alt="" style={{ width: 24, height: 24, objectFit: 'contain', filter: 'brightness(1.5)', marginRight: 6 }} />
         <span>{xp}</span>
-        <span className="xp-display__separator">/</span>
-        <span className="xp-display__max">{maxXP}</span>
       </div>
 
       <div className="xp-quick-buttons">
