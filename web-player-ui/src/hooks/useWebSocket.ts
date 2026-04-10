@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameState, ServerStateMessage } from '../types';
+import { parseServerGameState } from '../utils/serverProtocol';
 
 interface UseWebSocketOptions {
   url: string;
@@ -78,7 +79,8 @@ export function useWebSocket({
           try {
             const index = parseInt(match[1], 10);
             const description = match[2];
-            const gameState: GameState = JSON.parse(stateJson);
+            const rawState = JSON.parse(stateJson);
+            const gameState = parseServerGameState(rawState);
             onStateUpdateRef.current({ index, description, gameState });
           } catch (parseError) {
             onErrorRef.current(`Failed to parse server message: ${parseError}`);
