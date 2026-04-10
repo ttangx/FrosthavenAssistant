@@ -14,6 +14,11 @@ void main() async {
   // Provide the WebSocket handler with a way to get current game state.
   wsHandler.getCurrentState = () => server.currentStateMessage('');
 
+  // Bridge TCP state changes to WebSocket clients.
+  server.onStateBroadcast = (data) {
+    wsHandler.broadcastToWebClients(data);
+  };
+
   // Start the HTTP/WebSocket server on port 4568 for web browser clients.
   late final HttpServer httpServer;
   try {

@@ -13,6 +13,10 @@ class StandaloneServer extends GameServer {
   final Map<Socket,ConnectionHealth> _connectionHealth = {};
   int pingCount = 0;
 
+  /// Called whenever state is broadcast to TCP clients.
+  /// Use this to forward state to other listeners (e.g. WebSocket clients).
+  void Function(String data)? onStateBroadcast;
+
 
   @override
   void addClientConnection(Socket client) {
@@ -107,6 +111,7 @@ class StandaloneServer extends GameServer {
     for(Socket client in _clientConnections){
       _writeToClient(client, message);
     }
+    onStateBroadcast?.call(data);
   }
 
   @override
@@ -127,6 +132,7 @@ class StandaloneServer extends GameServer {
         print("Attempted to access properties on a closed client $exception");
       }
     }
+    onStateBroadcast?.call(data);
   }
 
   void _writeToClient(Socket client, String message) {
