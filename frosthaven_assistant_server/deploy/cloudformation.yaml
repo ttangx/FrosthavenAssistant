@@ -113,13 +113,23 @@ Resources:
           wget -q https://storage.googleapis.com/dart-archive/channels/stable/release/latest/sdk/dartsdk-linux-arm64-release.zip -O /tmp/dart-sdk.zip
           unzip -q /tmp/dart-sdk.zip -d /opt
 
+          echo "=== Installing Node.js for web UI build ==="
+          curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+          apt-get install -y nodejs
+
           echo "=== Cloning and building server ==="
-          mkdir -p /opt/frosthaven
+          mkdir -p /opt/frosthaven/web
           cd /tmp
           git clone --depth 1 https://github.com/Tarmslitaren/FrosthavenAssistant.git
           cd FrosthavenAssistant/frosthaven_assistant_server
           /opt/dart-sdk/bin/dart pub get
           /opt/dart-sdk/bin/dart compile exe lib/main.dart -o /opt/frosthaven/server
+
+          echo "=== Building web player UI ==="
+          cd /tmp/FrosthavenAssistant/web-player-ui
+          npm ci
+          npm run build
+          cp -r dist/* /opt/frosthaven/web/
 
           echo "=== Installing systemd service ==="
           cat > /etc/systemd/system/frosthaven-server.service <<'UNIT'

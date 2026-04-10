@@ -8,7 +8,12 @@ import ConnectionStatus from './components/ConnectionStatus';
 import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
-  const [serverAddress, setServerAddress] = useState('fh.epicbroccoli.com:4568');
+  // Default to same origin (when served by Dart server) or fallback to known server
+  const [serverAddress, setServerAddress] = useState(
+    () => window.location.port === '5173'
+      ? 'fh.epicbroccoli.com:4568'  // Vite dev server
+      : window.location.host         // Served by Dart server on same port
+  );
   const [error, setError] = useState<string | null>(null);
 
   const {
