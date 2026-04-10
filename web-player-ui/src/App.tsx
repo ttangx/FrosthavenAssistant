@@ -17,10 +17,14 @@ function App() {
   );
   const [error, setError] = useState<string | null>(null);
 
-  // Request notification permission once
-  useEffect(() => {
+  // Track whether we've asked for notification permission
+  const [notifPermission, setNotifPermission] = useState(
+    () => 'Notification' in window ? Notification.permission : 'denied'
+  );
+
+  const requestNotifications = useCallback(() => {
     if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
+      Notification.requestPermission().then((p) => setNotifPermission(p));
     }
   }, []);
 
@@ -134,7 +138,7 @@ function App() {
         {!selectedCharacter && gameState && (
           <CharacterSelection
             characters={gameState.characters}
-            onSelect={selectCharacter}
+            onSelect={(id) => { requestNotifications(); selectCharacter(id); }}
             serverAddress={serverAddress}
             onServerAddressChange={setServerAddress}
           />
