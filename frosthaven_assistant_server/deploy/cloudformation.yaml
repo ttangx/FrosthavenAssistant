@@ -74,15 +74,25 @@ Resources:
           CidrIpv6: ::/0
           Description: Game server TCP IPv6
         - IpProtocol: tcp
-          FromPort: 4568
-          ToPort: 4568
+          FromPort: 80
+          ToPort: 80
           CidrIp: 0.0.0.0/0
-          Description: WebSocket server
+          Description: Web UI and WebSocket
         - IpProtocol: tcp
-          FromPort: 4568
-          ToPort: 4568
+          FromPort: 80
+          ToPort: 80
           CidrIpv6: ::/0
-          Description: WebSocket server IPv6
+          Description: Web UI and WebSocket IPv6
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: HTTPS
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIpv6: ::/0
+          Description: HTTPS IPv6
       Tags:
         - Key: Name
           Value: frosthaven-server
