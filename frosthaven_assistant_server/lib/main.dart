@@ -15,20 +15,26 @@ void main() async {
   wsHandler.getCurrentState = () => server.currentStateMessage('');
 
   // Start the HTTP/WebSocket server on port 4568 for web browser clients.
-  final httpServer = await _startWebSocketServer(wsHandler, 4568);
+  late final HttpServer httpServer;
+  try {
+    httpServer = await _startWebSocketServer(wsHandler, 4568);
+  } catch (e) {
+    print('Failed to start WebSocket server on port 4568: $e');
+    exit(1);
+  }
 
-  ProcessSignal.sigint.watch().listen((signal) {
+  ProcessSignal.sigint.watch().listen((signal) async {
     print('Received SIGINT signal, shutting down gracefully...');
     wsHandler.closeAllConnections();
-    httpServer.close();
+    await httpServer.close();
     server.stopServer("Shutdown Requested");
     exit(0);
   });
   if (!Platform.isWindows) {
-    ProcessSignal.sigterm.watch().listen((signal) {
+    ProcessSignal.sigterm.watch().listen((signal) async {
       print('Received SIGTERM signal, shutting down gracefully...');
       wsHandler.closeAllConnections();
-      httpServer.close();
+      await httpServer.close();
       server.stopServer("Shutdown Requested");
       exit(0);
     });
