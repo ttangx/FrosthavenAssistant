@@ -13,7 +13,7 @@ interface UseWebSocketReturn {
   send: (message: any) => void;
 }
 
-const MESSAGE_REGEX = /Index:(\d+)Description:(.+?)GameState:(.+)$/s;
+const MESSAGE_REGEX = /Index:(-?\d+)Description:(.*?)GameState:(.*)$/s;
 const MISMATCH_PREFIX = 'Mismatch:';
 const MAX_RECONNECT_ATTEMPTS = 10;
 const BASE_RECONNECT_DELAY = 1000;
@@ -70,10 +70,15 @@ export function useWebSocket({
 
         const match = data.match(MESSAGE_REGEX);
         if (match) {
+          const stateJson = match[3];
+          if (!stateJson) {
+            // Server has no active game state (e.g. index -1, empty state)
+            return;
+          }
           try {
             const index = parseInt(match[1], 10);
             const description = match[2];
-            const gameState: GameState = JSON.parse(match[3]);
+            const gameState: GameState = JSON.parse(stateJson);
             onStateUpdateRef.current({ index, description, gameState });
           } catch (parseError) {
             onErrorRef.current(`Failed to parse server message: ${parseError}`);

@@ -8,7 +8,7 @@ import ConnectionStatus from './components/ConnectionStatus';
 import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
-  const [serverAddress, setServerAddress] = useState('localhost:4568');
+  const [serverAddress, setServerAddress] = useState('fh.epicbroccoli.com:4568');
   const [error, setError] = useState<string | null>(null);
 
   const {
