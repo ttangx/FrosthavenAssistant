@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Frosthaven Assistant - Game Server (EC2) + Web Player UI (S3/CloudFront)
+Description: Frosthaven Assistant - Game Server + Web Player UI on EC2
 
 Parameters:
   HostedZoneId:
@@ -7,16 +7,8 @@ Parameters:
     Description: Route53 hosted zone ID for the domain
   DomainName:
     Type: String
-    Description: Full domain name for the game server
+    Description: Full domain name for the server
     Default: fh.epicbroccoli.com
-  WebDomainName:
-    Type: String
-    Description: Full domain name for the web player UI
-    Default: play.epicbroccoli.com
-  AcmCertificateArn:
-    Type: String
-    Description: ACM certificate ARN for HTTPS (must be in us-east-1 for CloudFront)
-    Default: ''
   ServerPort:
     Type: Number
     Default: 4567
@@ -30,14 +22,7 @@ Parameters:
     Default: /aws/service/canonical/ubuntu/server/24.04/stable/current/arm64/hvm/ebs-gp3/ami-id
     Description: Ubuntu 24.04 ARM64 AMI (resolved via SSM parameter)
 
-Conditions:
-  HasCertificate: !Not [!Equals [!Ref AcmCertificateArn, '']]
-
 Resources:
-  # ═══════════════════════════════════════════
-  # Game Server (EC2)
-  # ═══════════════════════════════════════════
-
   InstanceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -61,13 +46,13 @@ Resources:
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Frosthaven Assistant Server - allows game traffic
+      GroupDescription: Frosthaven Assistant Server
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: !Ref ServerPort
           ToPort: !Ref ServerPort
           CidrIp: 0.0.0.0/0
-          Description: Game server TCP
+          Description: Game server TCP (Flutter clients)
         - IpProtocol: tcp
           FromPort: !Ref ServerPort
           ToPort: !Ref ServerPort
@@ -77,12 +62,12 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-          Description: Web UI and WebSocket
+          Description: Web UI + WebSocket
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
           CidrIpv6: ::/0
-          Description: Web UI and WebSocket IPv6
+          Description: Web UI + WebSocket IPv6
         - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
@@ -123,15 +108,17 @@ Resources:
           wget -q https://storage.googleapis.com/dart-archive/channels/stable/release/latest/sdk/dartsdk-linux-arm64-release.zip -O /tmp/dart-sdk.zip
           unzip -q /tmp/dart-sdk.zip -d /opt
 
-          echo "=== Installing Node.js for web UI build ==="
+          echo "=== Installing Node.js ==="
           curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
           apt-get install -y nodejs
 
-          echo "=== Cloning and building server ==="
+          echo "=== Cloning repository ==="
           mkdir -p /opt/frosthaven/web
           cd /tmp
           git clone --depth 1 https://github.com/Tarmslitaren/FrosthavenAssistant.git
-          cd FrosthavenAssistant/frosthaven_assistant_server
+
+          echo "=== Building game server ==="
+          cd /tmp/FrosthavenAssistant/frosthaven_assistant_server
           /opt/dart-sdk/bin/dart pub get
           /opt/dart-sdk/bin/dart compile exe lib/main.dart -o /opt/frosthaven/server
 
@@ -187,7 +174,7 @@ Resources:
       InstanceId: !Ref Instance
       AllocationId: !GetAtt ElasticIP.AllocationId
 
-  ServerDNSRecord:
+  DNSRecord:
     Type: AWS::Route53::RecordSet
     Properties:
       HostedZoneId: !Ref HostedZoneId
@@ -197,134 +184,19 @@ Resources:
       ResourceRecords:
         - !Ref ElasticIP
 
-  # ═══════════════════════════════════════════
-  # Web Player UI (S3 + CloudFront)
-  # ═══════════════════════════════════════════
-
-  WebBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub '${WebDomainName}'
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      Tags:
-        - Key: Name
-          Value: frosthaven-web-ui
-
-  WebBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref WebBucket
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Sid: AllowCloudFrontRead
-            Effect: Allow
-            Principal:
-              Service: cloudfront.amazonaws.com
-            Action: s3:GetObject
-            Resource: !Sub '${WebBucket.Arn}/*'
-            Condition:
-              StringEquals:
-                AWS:SourceArn: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${WebDistribution}'
-
-  WebOriginAccessControl:
-    Type: AWS::CloudFront::OriginAccessControl
-    Properties:
-      OriginAccessControlConfig:
-        Name: frosthaven-web-oac
-        OriginAccessControlOriginType: s3
-        SigningBehavior: always
-        SigningProtocol: sigv4
-
-  WebDistribution:
-    Type: AWS::CloudFront::Distribution
-    Properties:
-      DistributionConfig:
-        Enabled: true
-        Comment: Frosthaven Web Player UI
-        DefaultRootObject: index.html
-        HttpVersion: http2and3
-        PriceClass: PriceClass_100
-        Aliases: !If
-          - HasCertificate
-          - [!Ref WebDomainName]
-          - !Ref AWS::NoValue
-        ViewerCertificate: !If
-          - HasCertificate
-          - AcmCertificateArn: !Ref AcmCertificateArn
-            SslSupportMethod: sni-only
-            MinimumProtocolVersion: TLSv1.2_2021
-          - CloudFrontDefaultCertificate: true
-        Origins:
-          - Id: S3Origin
-            DomainName: !GetAtt WebBucket.RegionalDomainName
-            OriginAccessControlId: !Ref WebOriginAccessControl
-            S3OriginConfig:
-              OriginAccessIdentity: ''
-        DefaultCacheBehavior:
-          TargetOriginId: S3Origin
-          ViewerProtocolPolicy: redirect-to-https
-          AllowedMethods: [GET, HEAD, OPTIONS]
-          CachedMethods: [GET, HEAD]
-          Compress: true
-          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
-        CustomErrorResponses:
-          # SPA routing: return index.html for 404s
-          - ErrorCode: 403
-            ResponseCode: 200
-            ResponsePagePath: /index.html
-            ErrorCachingMinTTL: 10
-          - ErrorCode: 404
-            ResponseCode: 200
-            ResponsePagePath: /index.html
-            ErrorCachingMinTTL: 10
-      Tags:
-        - Key: Name
-          Value: frosthaven-web-ui
-
-  WebDNSRecord:
-    Type: AWS::Route53::RecordSet
-    Condition: HasCertificate
-    Properties:
-      HostedZoneId: !Ref HostedZoneId
-      Name: !Ref WebDomainName
-      Type: A
-      AliasTarget:
-        DNSName: !GetAtt WebDistribution.DomainName
-        HostedZoneId: Z2FDTNDATAQYW2  # CloudFront global hosted zone ID
-
 Outputs:
   PublicIP:
-    Description: Elastic IP address of the game server
+    Description: Elastic IP address of the server
     Value: !Ref ElasticIP
-  ServerDomain:
-    Description: Domain name for the game server
+  Domain:
+    Description: Domain name for the server
     Value: !Ref DomainName
-  ConnectionString:
+  WebUI:
+    Description: Web player UI URL
+    Value: !Sub 'http://${DomainName}'
+  WebSocket:
+    Description: WebSocket endpoint
+    Value: !Sub 'ws://${DomainName}/ws'
+  FlutterConnection:
     Description: What to enter in the Flutter app
     Value: !Sub '${DomainName}:${ServerPort}'
-  WebsocketURL:
-    Description: WebSocket URL for the web player UI
-    Value: !Sub 'ws://${DomainName}:4568/ws'
-  WebBucketName:
-    Description: S3 bucket for web UI deployment
-    Value: !Ref WebBucket
-  WebCloudFrontDomain:
-    Description: CloudFront domain for the web UI
-    Value: !GetAtt WebDistribution.DomainName
-  WebCloudFrontDistributionId:
-    Description: CloudFront distribution ID (for cache invalidation)
-    Value: !Ref WebDistribution
-  WebURL:
-    Description: Web player UI URL
-    Value: !If
-      - HasCertificate
-      - !Sub 'https://${WebDomainName}'
-      - !Sub 'https://${WebDistribution.DomainName}'
-  DeployCommand:
-    Description: Command to deploy web UI (run from web-player-ui/)
-    Value: !Sub 'npm run build && aws s3 sync dist/ s3://${WebBucket} --delete && aws cloudfront create-invalidation --distribution-id ${WebDistribution} --paths "/*"'
