@@ -57,7 +57,7 @@ function App() {
     (delta: number) => {
       if (!selectedCharacterId) return;
       optimisticHealthChange(selectedCharacterId, delta);
-      send({ action: 'healthChange', characterId: selectedCharacterId, delta });
+      send({ action: 'changeHealth', characterId: selectedCharacterId, value: delta });
     },
     [selectedCharacterId, optimisticHealthChange, send],
   );
@@ -79,7 +79,7 @@ function App() {
     (amount: number) => {
       if (!selectedCharacterId) return;
       optimisticAddXP(selectedCharacterId, amount);
-      send({ action: 'addXP', characterId: selectedCharacterId, amount });
+      send({ action: 'addXP', characterId: selectedCharacterId, value: amount });
     },
     [selectedCharacterId, optimisticAddXP, send],
   );
@@ -87,14 +87,16 @@ function App() {
   const handleToggleCondition = useCallback(
     (condition: string) => {
       if (!selectedCharacterId) return;
+      const selectedChar = getSelectedCharacter();
+      const isActive = selectedChar?.conditions.includes(condition) ?? false;
       optimisticToggleCondition(selectedCharacterId, condition);
       send({
-        action: 'toggleCondition',
+        action: isActive ? 'removeStatusEffect' : 'addStatusEffect',
         characterId: selectedCharacterId,
-        condition,
+        effect: condition,
       });
     },
-    [selectedCharacterId, optimisticToggleCondition, send],
+    [selectedCharacterId, getSelectedCharacter, optimisticToggleCondition, send],
   );
 
   return (
