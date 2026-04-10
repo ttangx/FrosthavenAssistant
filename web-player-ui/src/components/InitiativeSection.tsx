@@ -55,7 +55,7 @@ export default function InitiativeSection({
       // Then every 30 seconds
       intervalRef.current = setInterval(() => {
         new Notification('Frosthaven', { body: 'Still waiting on your initiative!' });
-      }, 30000);
+      }, 15000);
     }
     return () => {
       if (intervalRef.current) {
