@@ -16,6 +16,9 @@ class WebSocketHandler {
   /// Called when a validated command should be applied to game state.
   bool Function(Map<String, dynamic> command, String description)? onCommand;
 
+  /// Called when a client sends a push subscription.
+  void Function(String characterId, Map<String, dynamic> subscription)? onPushSubscribe;
+
   /// Number of active WebSocket connections.
   int get connectionCount => _connections.length;
 
@@ -69,6 +72,14 @@ class WebSocketHandler {
       final missing = validateMessage(message, requiredFields);
       if (missing.isNotEmpty) {
         print('Web message missing fields: ${missing.join(', ')}');
+        return;
+      }
+
+      if (action == 'pushSubscribe') {
+        final characterId = message['characterId'] as String;
+        final subscription = message['subscription'] as Map<String, dynamic>;
+        onPushSubscribe?.call(characterId, subscription);
+        print('Push subscription received for $characterId');
         return;
       }
 

@@ -5,6 +5,7 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 
+import 'package:frosthaven_assistant_server/push_state.dart';
 import 'package:frosthaven_assistant_server/standalone_server.dart';
 import 'package:frosthaven_assistant_server/websocket_handler.dart';
 
@@ -13,6 +14,7 @@ const String _webRoot = '/opt/frosthaven/web';
 void main() async {
   StandaloneServer server = StandaloneServer();
   final wsHandler = WebSocketHandler();
+  final pushState = PushState();
 
   // Provide the WebSocket handler with a way to get current game state.
   wsHandler.getCurrentState = () => server.currentStateMessage('');
@@ -20,11 +22,21 @@ void main() async {
   // Bridge TCP state changes to WebSocket clients.
   server.onStateBroadcast = (data) {
     wsHandler.broadcastToWebClients(data);
+    // Check push notification conditions on state change
+    final gsIndex = data.indexOf('GameState:');
+    if (gsIndex != -1) {
+      pushState.onStateChanged(data.substring(gsIndex + 'GameState:'.length));
+    }
   };
 
   // Route web commands through the server's command processor.
   wsHandler.onCommand = (command, description) {
     return server.applyWebCommand(command, description);
+  };
+
+  // Handle push subscriptions from web clients.
+  wsHandler.onPushSubscribe = (characterId, subscription) {
+    pushState.subscribe(characterId, subscription);
   };
 
   // Start the HTTP/WebSocket server on port 8080 (Caddy reverse-proxies 80/443 here).
@@ -38,6 +50,7 @@ void main() async {
 
   ProcessSignal.sigint.watch().listen((signal) async {
     print('Received SIGINT signal, shutting down gracefully...');
+    pushState.dispose();
     wsHandler.closeAllConnections();
     await httpServer.close();
     server.stopServer("Shutdown Requested");
@@ -46,6 +59,7 @@ void main() async {
   if (!Platform.isWindows) {
     ProcessSignal.sigterm.watch().listen((signal) async {
       print('Received SIGTERM signal, shutting down gracefully...');
+      pushState.dispose();
       wsHandler.closeAllConnections();
       await httpServer.close();
       server.stopServer("Shutdown Requested");
