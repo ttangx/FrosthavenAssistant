@@ -22,6 +22,11 @@ void main() async {
     wsHandler.broadcastToWebClients(data);
   };
 
+  // Route web commands through the server's command processor.
+  wsHandler.onCommand = (command, description) {
+    return server.applyWebCommand(command, description);
+  };
+
   // Start the HTTP/WebSocket server on port 80 for web browser clients.
   late final HttpServer httpServer;
   try {

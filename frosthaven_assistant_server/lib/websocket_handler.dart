@@ -13,6 +13,9 @@ class WebSocketHandler {
   /// Set this before accepting connections.
   String Function()? getCurrentState;
 
+  /// Called when a validated command should be applied to game state.
+  bool Function(Map<String, dynamic> command, String description)? onCommand;
+
   /// Number of active WebSocket connections.
   int get connectionCount => _connections.length;
 
@@ -70,10 +73,15 @@ class WebSocketHandler {
       }
 
       final description = describeAction(message);
-      print('Web action: $description');
 
-      // Full command routing will be added in a later phase.
-      // For now, we log the validated action.
+      if (onCommand != null) {
+        final applied = onCommand!(message, description);
+        if (!applied) {
+          print('Web command not applied: $description');
+        }
+      } else {
+        print('Web action (no handler): $description');
+      }
     } catch (e) {
       print('Error parsing web message: $e');
     }
