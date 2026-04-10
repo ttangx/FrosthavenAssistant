@@ -68,26 +68,30 @@ export default function HealthSection({
           height: 100%;
           border-radius: 999px;
           transition: width 0.4s ease, background-color 0.4s ease;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 0 8px rgba(56, 176, 96, 0.3);
         }
 
         .health-display {
           text-align: center;
-          font-family: var(--font-condensed);
-          font-size: 2rem;
-          font-weight: 700;
+          font-family: var(--font-display);
+          font-size: 2.2rem;
+          font-weight: 900;
           color: var(--color-text-bright);
           margin-bottom: 0.75rem;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
         .health-display__separator {
           font-weight: 400;
-          opacity: 0.4;
-          margin: 0 0.15rem;
+          opacity: 0.3;
+          margin: 0 0.1rem;
+          font-size: 1.6rem;
         }
 
         .health-display__max {
-          opacity: 0.5;
-          font-weight: 600;
+          opacity: 0.45;
+          font-weight: 700;
+          font-size: 1.6rem;
         }
 
         .health-quick-buttons {

@@ -44,36 +44,41 @@ export default function StatusEffects({
         }
 
         .status-effects__grid {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.5rem;
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 0.4rem;
         }
 
         .condition-badge {
-          display: inline-flex;
+          display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 0.35rem;
-          min-height: 44px;
-          padding: 0.3rem 0.75rem;
-          border-radius: 999px;
-          font-size: 0.75rem;
+          gap: 0.2rem;
+          min-height: 56px;
+          padding: 0.4rem 0.2rem;
+          border-radius: var(--border-radius-sm);
+          font-size: 0.6rem;
           font-weight: 600;
           cursor: pointer;
           transition: all var(--transition);
           -webkit-tap-highlight-color: transparent;
-          border: 2px solid transparent;
+          border: 1px solid transparent;
           text-transform: capitalize;
+          font-family: var(--font-condensed);
+          letter-spacing: 0.03em;
         }
 
         .condition-badge__icon {
-          width: 22px;
-          height: 22px;
+          width: 26px;
+          height: 26px;
           object-fit: contain;
+          filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
         }
 
         .condition-badge--inactive .condition-badge__icon {
-          opacity: 0.5;
+          opacity: 0.4;
+          filter: saturate(0.3) drop-shadow(0 1px 2px rgba(0,0,0,0.3));
         }
 
         .condition-badge--inactive {
@@ -88,10 +93,15 @@ export default function StatusEffects({
         }
 
         .condition-badge--active {
-          background: linear-gradient(180deg, var(--color-ice-dark) 0%, #1a6080 100%);
+          background: linear-gradient(180deg, rgba(44, 138, 168, 0.4) 0%, rgba(26, 96, 128, 0.5) 100%);
           color: var(--color-text-bright);
           border-color: var(--color-frost);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 6px rgba(91, 189, 213, 0.2);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 0 12px rgba(91, 189, 213, 0.15);
+        }
+
+        .condition-badge--active .condition-badge__icon {
+          opacity: 1;
+          filter: drop-shadow(0 0 4px rgba(91, 189, 213, 0.4)) drop-shadow(0 1px 2px rgba(0,0,0,0.3));
         }
 
         .condition-badge--active:hover {

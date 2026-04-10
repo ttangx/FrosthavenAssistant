@@ -26,34 +26,42 @@ export default function CharacterSheet({
           gap: 0;
         }
 
+        .character-header-card {
+          padding: 0 !important;
+          overflow: hidden;
+        }
+
         .character-header {
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          margin-bottom: 0.25rem;
+          padding: 1rem;
           position: relative;
           overflow: hidden;
+          min-height: 80px;
         }
 
         .character-header__portrait-bg {
           position: absolute;
-          right: -20px;
-          top: -20px;
-          width: 140px;
-          height: 140px;
+          right: -30px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 180px;
+          height: 180px;
           object-fit: cover;
-          opacity: 0.08;
+          object-position: top center;
+          opacity: 0.12;
           pointer-events: none;
-          mask-image: radial-gradient(circle, black 30%, transparent 70%);
-          -webkit-mask-image: radial-gradient(circle, black 30%, transparent 70%);
+          mask-image: radial-gradient(ellipse at center, black 20%, transparent 65%);
+          -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 65%);
         }
 
         .character-header__class-icon {
-          width: 40px;
-          height: 40px;
+          width: 44px;
+          height: 44px;
           object-fit: contain;
-          opacity: 0.8;
-          filter: brightness(1.8);
+          opacity: 0.85;
+          filter: brightness(1.8) drop-shadow(0 2px 4px rgba(0,0,0,0.4));
           flex-shrink: 0;
         }
 
@@ -66,35 +74,45 @@ export default function CharacterSheet({
 
         .character-header__name {
           font-family: var(--font-display);
-          font-size: 1.35rem;
+          font-size: 1.4rem;
           font-weight: 700;
           color: var(--color-text-bright);
-          letter-spacing: 0.02em;
+          letter-spacing: 0.03em;
+          text-shadow: 0 2px 6px rgba(0,0,0,0.4);
         }
 
         .character-header__class {
           font-family: var(--font-condensed);
           font-size: 0.8rem;
-          color: var(--color-text-muted);
+          color: var(--color-frost);
           text-transform: uppercase;
-          letter-spacing: 0.08em;
-          font-weight: 500;
+          letter-spacing: 0.1em;
+          font-weight: 600;
         }
 
         .character-header__level {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          min-width: 42px;
-          height: 42px;
+          flex-direction: column;
+          min-width: 44px;
+          height: 44px;
           border-radius: 50%;
           background: linear-gradient(180deg, var(--color-ice-medium) 0%, var(--color-ice-dark) 100%);
-          border: 2px solid rgba(91, 189, 213, 0.4);
+          border: 2px solid rgba(91, 189, 213, 0.5);
           color: var(--color-text-bright);
           font-family: var(--font-condensed);
-          font-size: 1.1rem;
+          font-size: 1.15rem;
           font-weight: 700;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+          box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+          position: relative;
+        }
+
+        /* Decorative bottom accent bar */
+        .character-header__accent {
+          height: 3px;
+          background: linear-gradient(90deg, transparent 5%, var(--color-frost) 30%, var(--color-frost) 70%, transparent 95%);
+          opacity: 0.5;
         }
 
         .scenario-toggle {
@@ -189,7 +207,7 @@ export default function CharacterSheet({
       `}</style>
 
       {/* Character Header */}
-      <div className="card">
+      <div className="card character-header-card">
         <div className="character-header">
           <img
             className="character-header__portrait-bg"
@@ -209,6 +227,7 @@ export default function CharacterSheet({
             {character.level}
           </span>
         </div>
+        <div className="character-header__accent" />
       </div>
 
       {/* Initiative */}

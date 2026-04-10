@@ -11,8 +11,8 @@ function App() {
   // Default to same origin (when served by Dart server) or fallback to known server
   const [serverAddress, setServerAddress] = useState(
     () => window.location.port === '5173'
-      ? 'fh.epicbroccoli.com:4568'  // Vite dev server
-      : window.location.host         // Served by Dart server on same port
+      ? '3.228.107.88'       // Vite dev server — use IP until DNS propagates
+      : window.location.host  // Served by Dart server on same port
   );
   const [error, setError] = useState<string | null>(null);
 

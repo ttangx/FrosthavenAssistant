@@ -36,9 +36,9 @@
   /* Layout */
   --border-radius: 6px;
   --border-radius-sm: 4px;
-  --shadow-panel: 0 4px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-panel: 0 4px 20px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   --shadow-button: 0 2px 6px rgba(0, 0, 0, 0.3);
-  --shadow-inset: inset 0 2px 6px rgba(0, 0, 0, 0.25);
+  --shadow-inset: inset 0 2px 6px rgba(0, 0, 0, 0.3);
   --transition: 0.15s ease;
 
   /* Fonts */
@@ -110,12 +110,26 @@ body::before {
   position: relative;
 }
 
+/* Inner border + top highlight for depth */
 .card::before {
   content: '';
   position: absolute;
-  inset: 0;
-  border-radius: var(--border-radius);
-  background: linear-gradient(180deg, rgba(120, 180, 210, 0.04) 0%, transparent 40%);
+  inset: 2px;
+  border-radius: calc(var(--border-radius) - 2px);
+  border: 1px solid rgba(120, 180, 210, 0.06);
+  background: linear-gradient(180deg, rgba(140, 200, 230, 0.05) 0%, transparent 30%);
+  pointer-events: none;
+}
+
+/* Subtle bottom edge shadow */
+.card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.3), transparent);
   pointer-events: none;
 }
 

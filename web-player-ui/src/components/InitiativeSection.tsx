@@ -107,16 +107,17 @@ export default function InitiativeSection({
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 72px;
-          height: 72px;
+          width: 80px;
+          height: 80px;
           border-radius: 50%;
-          background: linear-gradient(180deg, var(--color-ice-medium) 0%, var(--color-ice-dark) 100%);
-          border: 3px solid rgba(91, 189, 213, 0.4);
+          background: radial-gradient(circle at 35% 35%, #5cc8e0 0%, var(--color-ice-dark) 60%, #1a5a72 100%);
+          border: 3px solid rgba(91, 189, 213, 0.5);
           color: var(--color-text-bright);
-          font-family: var(--font-condensed);
-          font-size: 2rem;
-          font-weight: 700;
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), inset 0 2px 0 rgba(255, 255, 255, 0.15);
+          font-family: var(--font-display);
+          font-size: 2.2rem;
+          font-weight: 900;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0,0,0,0.3), inset 0 2px 0 rgba(255, 255, 255, 0.2), inset 0 -2px 4px rgba(0,0,0,0.2);
         }
 
         .initiative-badge__label {
