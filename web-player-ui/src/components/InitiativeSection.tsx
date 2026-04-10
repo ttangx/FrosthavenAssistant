@@ -17,7 +17,8 @@ export default function InitiativeSection({
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const roundStarted = gameState.round > 0;
+  // roundState 0 = pre-draw (players inputting initiative), 1+ = cards drawn (turn order visible)
+  const roundStarted = gameState.roundState > 0;
   const hasInitiative = character.initiative !== null;
 
   // Sort characters by initiative (ascending - lower goes first in Gloomhaven)

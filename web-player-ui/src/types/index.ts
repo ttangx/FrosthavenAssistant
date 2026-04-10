@@ -14,6 +14,7 @@ export interface Character {
 export interface GameState {
   characters: Character[];
   round: number;
+  roundState: number; // 0 = pre-draw (initiative input), 1+ = round active (turn order revealed)
   currentTurn: number | null;
   scenarioName: string;
   scenarioLevel: number;

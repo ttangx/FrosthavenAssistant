@@ -58,6 +58,7 @@ export function parseServerGameState(raw: RawGameState): GameState {
   return {
     characters,
     round: raw.round,
+    roundState: raw.roundState,
     currentTurn: null, // Derived from turnState if needed
     scenarioName: raw.scenario,
     scenarioLevel: raw.level,
