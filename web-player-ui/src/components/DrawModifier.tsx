@@ -3,6 +3,7 @@ import type { GameState } from '../types';
 
 interface DrawModifierProps {
   characterId: string;
+  conditions: string[];
   gameState: GameState;
   send: (message: any) => void;
   isConnected: boolean;
@@ -35,10 +36,12 @@ async function loadAttackData(): Promise<AttackData> {
 
 export default function DrawModifier({
   characterId,
+  conditions,
   gameState,
   send,
   isConnected,
 }: DrawModifierProps) {
+  const isPoisoned = conditions.includes('poisoned');
   const [attackData, setAttackData] = useState<AttackData | null>(null);
   const [options, setOptions] = useState<AttackOption[]>([]);
 
@@ -88,10 +91,11 @@ export default function DrawModifier({
   }, [attackData, gameState]);
 
   const handleDraw = (opt: AttackOption) => {
+    const attack = isPoisoned ? opt.totalAttack + 1 : opt.totalAttack;
     send({
       action: 'drawModifier',
       characterId,
-      baseAttack: opt.totalAttack,
+      baseAttack: attack,
     });
   };
 
@@ -175,7 +179,10 @@ export default function DrawModifier({
             disabled={!isConnected}
           >
             <span className="draw-modifier__type">{opt.type}</span>
-            <span className="draw-modifier__attack">{opt.totalAttack}</span>
+            <span className="draw-modifier__attack">
+              {isPoisoned ? opt.totalAttack + 1 : opt.totalAttack}
+              {isPoisoned && <span style={{ fontSize: '0.6rem', opacity: 0.7 }}> +1</span>}
+            </span>
           </button>
         ))}
       </div>
