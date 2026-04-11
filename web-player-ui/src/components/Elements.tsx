@@ -7,12 +7,12 @@ interface ElementsProps {
 }
 
 const ELEMENTS = [
-  { index: 0, name: 'fire', icon: '/icons/element-fire.png' },
-  { index: 1, name: 'ice', icon: '/icons/element-ice.png' },
-  { index: 2, name: 'air', icon: '/icons/element-air.png' },
-  { index: 3, name: 'earth', icon: '/icons/element-earth.png' },
-  { index: 4, name: 'light', icon: '/icons/element-light.png' },
-  { index: 5, name: 'dark', icon: '/icons/element-dark.png' },
+  { index: 0, name: 'fire', icon: '/icons/element-fire-color.png' },
+  { index: 1, name: 'ice', icon: '/icons/element-ice-color.png' },
+  { index: 2, name: 'air', icon: '/icons/element-air-color.png' },
+  { index: 3, name: 'earth', icon: '/icons/element-earth-color.png' },
+  { index: 4, name: 'light', icon: '/icons/element-light-color.png' },
+  { index: 5, name: 'dark', icon: '/icons/element-dark-color.png' },
 ];
 
 // Cycle: inert(2) -> full(0) -> half(1) -> inert(2)
@@ -73,30 +73,31 @@ export default function Elements({
           transition: all var(--transition);
         }
 
-        /* Inert: dim */
+        /* Inert: dim and desaturated */
         .element-btn--inert {
-          opacity: 0.35;
+          opacity: 0.3;
         }
         .element-btn--inert .element-btn__icon {
-          filter: brightness(1.5) saturate(0);
+          filter: saturate(0.2) brightness(0.8);
         }
 
-        /* Full: bright with colored glow */
+        /* Full: vibrant with glow */
         .element-btn--full {
-          border-color: rgba(255, 255, 255, 0.3);
-          box-shadow: 0 0 10px rgba(255, 200, 100, 0.4), inset 0 0 8px rgba(255, 200, 100, 0.15);
+          opacity: 1;
+          border-color: rgba(255, 255, 255, 0.4);
+          box-shadow: 0 0 12px rgba(255, 200, 100, 0.5), inset 0 0 8px rgba(255, 200, 100, 0.2);
         }
         .element-btn--full .element-btn__icon {
-          filter: brightness(2.5);
+          filter: brightness(1.3) saturate(1.3);
         }
 
-        /* Half/waning: medium brightness */
+        /* Half/waning: partially faded */
         .element-btn--half {
+          opacity: 0.6;
           border-color: rgba(255, 255, 255, 0.15);
-          opacity: 0.7;
         }
         .element-btn--half .element-btn__icon {
-          filter: brightness(1.8) saturate(0.6);
+          filter: brightness(1) saturate(0.6);
         }
       `}</style>
 
