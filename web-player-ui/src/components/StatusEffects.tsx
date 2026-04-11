@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Character } from '../types';
 import { getConditionColorIcon } from '../utils/classAssets';
 
@@ -7,15 +8,18 @@ interface StatusEffectsProps {
   isConnected: boolean;
 }
 
-const CONDITION_NAMES = [
+const COMMON_CONDITIONS = [
   'poisoned',
   'wounded',
   'muddle',
+  'strengthen',
   'immobilize',
+];
+
+const OTHER_CONDITIONS = [
   'disarm',
   'stun',
   'invisible',
-  'strengthen',
   'bless',
   'curse',
   'regenerate',
@@ -30,6 +34,10 @@ export default function StatusEffects({
   onToggleCondition,
   isConnected,
 }: StatusEffectsProps) {
+  // Auto-expand if any "other" condition is active
+  const hasActiveOther = OTHER_CONDITIONS.some((c) => character.conditions.includes(c));
+  const [showMore, setShowMore] = useState(hasActiveOther);
+
   return (
     <section className="status-effects card" aria-label="Status Effects">
       <style>{`
@@ -113,12 +121,49 @@ export default function StatusEffects({
           opacity: 0.4;
           cursor: not-allowed;
         }
+
+        .status-effects__more-toggle {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.3rem;
+          width: 100%;
+          min-height: 28px;
+          padding: 0.2rem;
+          margin: 0.3rem 0;
+          background: transparent;
+          border: none;
+          box-shadow: none;
+          color: var(--color-text-muted);
+          font-family: var(--font-condensed);
+          font-size: 0.7rem;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          cursor: pointer;
+        }
+
+        .status-effects__more-toggle:hover {
+          background: transparent;
+          box-shadow: none;
+          color: var(--color-frost);
+          transform: none;
+        }
+
+        .status-effects__arrow {
+          font-size: 0.55rem;
+          transition: transform var(--transition);
+        }
+
+        .status-effects__arrow--open {
+          transform: rotate(180deg);
+        }
       `}</style>
 
       <h3 className="status-effects__heading">Status Effects</h3>
 
       <div className="status-effects__grid">
-        {CONDITION_NAMES.map((name) => {
+        {COMMON_CONDITIONS.map((name) => {
           const isActive = character.conditions.includes(name);
           return (
             <button
@@ -135,6 +180,36 @@ export default function StatusEffects({
           );
         })}
       </div>
+
+      <button
+        className="status-effects__more-toggle"
+        onClick={() => setShowMore((prev) => !prev)}
+        type="button"
+      >
+        {showMore ? 'Less' : 'More'}
+        <span className={`status-effects__arrow${showMore ? ' status-effects__arrow--open' : ''}`}>&#9660;</span>
+      </button>
+
+      {showMore && (
+        <div className="status-effects__grid">
+          {OTHER_CONDITIONS.map((name) => {
+            const isActive = character.conditions.includes(name);
+            return (
+              <button
+                key={name}
+                className={`condition-badge ${isActive ? 'condition-badge--active' : 'condition-badge--inactive'}`}
+                onClick={() => onToggleCondition(name)}
+                disabled={!isConnected}
+                aria-pressed={isActive}
+                aria-label={`${name}${isActive ? ' (active)' : ''}`}
+              >
+                <img className="condition-badge__icon" src={getConditionColorIcon(name)} alt="" />
+                {name}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }
