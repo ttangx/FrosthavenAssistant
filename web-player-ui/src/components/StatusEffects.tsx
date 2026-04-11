@@ -82,12 +82,12 @@ export default function StatusEffects({
           width: 30px;
           height: 30px;
           object-fit: contain;
-          filter: brightness(1.8) drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+          filter: brightness(1.4) drop-shadow(0 1px 3px rgba(0,0,0,0.4));
         }
 
         .condition-badge--inactive .condition-badge__icon {
-          opacity: 0.5;
-          filter: brightness(1.3) saturate(0.3) drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+          opacity: 0.6;
+          filter: brightness(1.1) saturate(0.5) drop-shadow(0 1px 2px rgba(0,0,0,0.3));
         }
 
         .condition-badge--inactive {
