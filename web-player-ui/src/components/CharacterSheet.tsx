@@ -267,13 +267,6 @@ export default function CharacterSheet({
         </div>
       </div>
 
-      {/* Elements */}
-      <Elements
-        elementState={gameState.elementState}
-        send={send}
-        isConnected={isConnected}
-      />
-
       {/* Initiative */}
       <InitiativeSection
         character={character}
@@ -308,6 +301,13 @@ export default function CharacterSheet({
       <StatusEffects
         character={character}
         onToggleCondition={onToggleCondition}
+        isConnected={isConnected}
+      />
+
+      {/* Elements */}
+      <Elements
+        elementState={gameState.elementState}
+        send={send}
         isConnected={isConnected}
       />
 
