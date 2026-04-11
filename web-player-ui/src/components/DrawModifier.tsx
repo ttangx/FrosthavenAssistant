@@ -8,8 +8,13 @@ interface DrawModifierProps {
   isConnected: boolean;
 }
 
+interface MonsterStatEntry {
+  levels: Record<string, { normal?: number; elite?: number; boss?: number }>;
+  deck: string;
+}
+
 interface AttackData {
-  monsterStats: Record<string, Record<string, { normal?: number; elite?: number; boss?: number }>>;
+  monsterStats: Record<string, MonsterStatEntry>;
   cardAttacks: Record<string, number>;
 }
 
@@ -52,10 +57,11 @@ export default function DrawModifier({
     const activeMonsters = gameState.monsters.filter((m) => m.turnState === 1);
 
     for (const monster of activeMonsters) {
-      const stats = attackData.monsterStats[monster.id];
+      const monsterData = attackData.monsterStats[monster.id];
+      const deckName = monsterData?.deck ?? monster.id;
 
-      // Find drawn ability card for this monster
-      const abilityDeck = gameState.abilityDecks.find((d) => d.name === monster.id);
+      // Find drawn ability card using the monster's deck name
+      const abilityDeck = gameState.abilityDecks.find((d) => d.name === deckName || d.name === monster.id);
       let abilityMod = 0;
       if (abilityDeck && abilityDeck.discardPile.length > 0) {
         const lastDrawn = abilityDeck.discardPile[abilityDeck.discardPile.length - 1];
@@ -63,9 +69,14 @@ export default function DrawModifier({
       }
 
       for (const instance of monster.instances) {
-        const typeName = instance.type === 2 ? 'elite' : 'normal';
-        const levelStats = stats?.[String(monster.level)];
-        const baseAttack = levelStats?.[typeName] ?? levelStats?.boss ?? 0;
+        const levelStats = monsterData?.levels?.[String(monster.level)];
+        // Boss monsters (type 2 with only boss stats) vs normal/elite
+        const isBoss = levelStats?.boss !== undefined && levelStats?.normal === undefined;
+        const baseAttack = isBoss
+          ? (levelStats?.boss ?? 0)
+          : instance.type === 2
+            ? (levelStats?.elite ?? 0)
+            : (levelStats?.normal ?? 0);
         const total = Math.max(0, baseAttack + abilityMod);
 
         options.push({
