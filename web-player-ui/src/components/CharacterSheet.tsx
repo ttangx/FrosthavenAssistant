@@ -286,6 +286,7 @@ export default function CharacterSheet({
       {/* Draw Modifier */}
       <DrawModifier
         characterId={character.id}
+        gameState={gameState}
         send={send}
         isConnected={isConnected}
       />
