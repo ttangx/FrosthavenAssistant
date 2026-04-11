@@ -75,6 +75,16 @@ class WebSocketHandler {
         return;
       }
 
+      if (action == 'clientError') {
+        final error = message['error'] as String? ?? 'unknown';
+        final stack = message['stack'] as String? ?? '';
+        final ua = message['userAgent'] as String? ?? '';
+        print('CLIENT ERROR: $error');
+        if (stack.isNotEmpty) print('  Stack: $stack');
+        if (ua.isNotEmpty) print('  UA: $ua');
+        return;
+      }
+
       if (action == 'pushSubscribe') {
         final characterId = message['characterId'] as String;
         final subscription = message['subscription'] as Map<String, dynamic>;
