@@ -104,10 +104,8 @@ export default function DrawModifier({
 
     const options: MonsterOption[] = [];
 
-    // Sort: active monster first (turnState 1), then not yet gone (0), skip done (2)
-    const relevantMonsters = rawMonsters
-      .filter((m: any) => m.turnState <= 1)
-      .sort((a: any, b: any) => (b.turnState === 1 ? 1 : 0) - (a.turnState === 1 ? 1 : 0));
+    // Only show the currently active monster (turnState 1)
+    const relevantMonsters = rawMonsters.filter((m: any) => m.turnState === 1);
 
     for (const monster of relevantMonsters) {
       const monsterId = monster.id as string;
