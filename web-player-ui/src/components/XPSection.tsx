@@ -146,6 +146,7 @@ export default function XPSection({
       </div>
 
       <div className="xp-quick-buttons">
+        <button onClick={() => onAddXP(-1)} disabled={!isConnected || xp <= 0}>-1</button>
         <button onClick={() => onAddXP(1)} disabled={!isConnected}>+1</button>
         <button onClick={() => onAddXP(2)} disabled={!isConnected}>+2</button>
       </div>

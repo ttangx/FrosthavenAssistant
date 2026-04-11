@@ -1,5 +1,28 @@
 import 'dart:convert';
 
+/// Condition name to enum index mapping (matches Flutter's Condition enum in enums.dart)
+const Map<String, int> _conditionIndex = {
+  'stun': 0,
+  'immobilize': 1,
+  'disarm': 2,
+  'wound': 3,
+  'wounded': 3,
+  'muddle': 5,
+  'poison': 6,
+  'poisoned': 6,
+  'bane': 10,
+  'brittle': 11,
+  'chill': 12,
+  'infect': 13,
+  'impair': 14,
+  'strengthen': 17,
+  'invisible': 18,
+  'regenerate': 19,
+  'ward': 20,
+  'bless': 24,
+  'curse': 25,
+};
+
 /// Applies a web command to the current game state JSON.
 ///
 /// Returns the modified JSON string, or null if the state
@@ -61,16 +84,26 @@ String? applyCommand(Map<String, dynamic> command, String currentStateJson) {
 
     case 'addStatusEffect':
       final effect = command['effect'] as String;
+      final effectIndex = _conditionIndex[effect];
+      if (effectIndex == null) {
+        print('Command processor: unknown condition "$effect"');
+        return null;
+      }
       final conditions = characterState['conditions'] as List<dynamic>? ?? [];
-      if (!conditions.contains(effect)) {
-        conditions.add(effect);
+      if (!conditions.contains(effectIndex)) {
+        conditions.add(effectIndex);
         characterState['conditions'] = conditions;
       }
 
     case 'removeStatusEffect':
       final effect = command['effect'] as String;
+      final effectIndex = _conditionIndex[effect];
+      if (effectIndex == null) {
+        print('Command processor: unknown condition "$effect"');
+        return null;
+      }
       final conditions = characterState['conditions'] as List<dynamic>? ?? [];
-      conditions.remove(effect);
+      conditions.remove(effectIndex);
       characterState['conditions'] = conditions;
 
     default:

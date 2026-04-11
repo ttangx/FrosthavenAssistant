@@ -1,5 +1,26 @@
 import type { Character, GameState } from '../types';
 
+/** Condition enum index to name (matches Flutter's Condition enum) */
+const CONDITION_NAMES: Record<number, string> = {
+  0: 'stun',
+  1: 'immobilize',
+  2: 'disarm',
+  3: 'wounded',
+  5: 'muddle',
+  6: 'poisoned',
+  10: 'bane',
+  11: 'brittle',
+  12: 'chill',
+  13: 'infect',
+  14: 'impair',
+  17: 'strengthen',
+  18: 'invisible',
+  19: 'regenerate',
+  20: 'ward',
+  24: 'bless',
+  25: 'curse',
+};
+
 /**
  * Raw server data types (as sent by the Dart server).
  * The server's GameState format differs from our internal types.
@@ -51,7 +72,9 @@ export function parseServerGameState(raw: RawGameState): GameState {
         xp: cs.xp,
         maxXP: 0, // Not provided by server; display-only
         initiative: cs.initiative,
-        conditions: cs.conditions ?? [],
+        conditions: (cs.conditions ?? []).map((c: number | string) =>
+          typeof c === 'number' ? (CONDITION_NAMES[c] ?? String(c)) : c
+        ),
       };
     });
 
