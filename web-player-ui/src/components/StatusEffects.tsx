@@ -79,19 +79,19 @@ export default function StatusEffects({
         }
 
         .condition-badge__icon {
-          width: 30px;
-          height: 30px;
+          width: 32px;
+          height: 32px;
           object-fit: contain;
-          filter: brightness(1.8) contrast(1.2) drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+          filter: brightness(2.2) contrast(1.3) drop-shadow(0 2px 4px rgba(0,0,0,0.6));
         }
 
         .condition-badge--inactive .condition-badge__icon {
-          opacity: 0.75;
-          filter: brightness(1.5) contrast(1.1) drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+          opacity: 0.85;
+          filter: brightness(1.8) contrast(1.2) drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
 
         .condition-badge--inactive {
-          background: var(--color-panel-dark);
+          background: rgba(17, 28, 38, 0.85);
           color: var(--color-text);
           border: 1px solid var(--color-panel-border);
         }
