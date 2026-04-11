@@ -186,6 +186,7 @@ function App() {
             onInitiativeSet={handleInitiativeSet}
             onAddXP={handleAddXP}
             onToggleCondition={handleToggleCondition}
+            send={send}
             isConnected={isConnected}
           />
         )}

@@ -49,5 +49,6 @@ export interface CharacterSheetProps {
   onInitiativeSet: (value: number) => void;
   onAddXP: (amount: number) => void;
   onToggleCondition: (condition: string) => void;
+  send: (message: any) => void;
   isConnected: boolean;
 }

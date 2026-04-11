@@ -5,6 +5,7 @@ import InitiativeSection from './InitiativeSection';
 import HealthSection from './HealthSection';
 import XPSection from './XPSection';
 import StatusEffects from './StatusEffects';
+import DrawModifier from './DrawModifier';
 
 export default function CharacterSheet({
   character,
@@ -13,6 +14,7 @@ export default function CharacterSheet({
   onInitiativeSet,
   onAddXP,
   onToggleCondition,
+  send,
   isConnected,
 }: CharacterSheetProps) {
   const [showScenarioInfo, setShowScenarioInfo] = useState(false);
@@ -278,6 +280,13 @@ export default function CharacterSheet({
       <HealthSection
         character={character}
         onHealthChange={onHealthChange}
+        isConnected={isConnected}
+      />
+
+      {/* Draw Modifier */}
+      <DrawModifier
+        characterId={character.id}
+        send={send}
         isConnected={isConnected}
       />
 

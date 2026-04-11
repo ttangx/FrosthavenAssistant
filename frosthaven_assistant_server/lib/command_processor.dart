@@ -106,10 +106,79 @@ String? applyCommand(Map<String, dynamic> command, String currentStateJson) {
       conditions.remove(effectIndex);
       characterState['conditions'] = conditions;
 
+    case 'drawModifier':
+      final baseAttack = (command['baseAttack'] as num?) ?? 0;
+      final modifierDeck = state['modifierDeck'] as Map<String, dynamic>?;
+      if (modifierDeck == null) {
+        print('Command processor: no modifierDeck in game state');
+        return null;
+      }
+
+      final drawPile = modifierDeck['drawPile'] as List<dynamic>? ?? [];
+      final discardPile = modifierDeck['discardPile'] as List<dynamic>? ?? [];
+
+      // Auto-shuffle if draw pile is empty
+      if (drawPile.isEmpty) {
+        if (discardPile.isEmpty) {
+          print('Command processor: modifier deck is empty');
+          return null;
+        }
+        drawPile.addAll(discardPile);
+        discardPile.clear();
+        drawPile.shuffle();
+      }
+
+      // Draw top card
+      final card = drawPile.removeLast();
+      discardPile.add(card);
+
+      // Calculate damage from card gfx
+      final gfx = (card is Map<String, dynamic>) ? (card['gfx'] as String? ?? '') : '';
+      final damage = _calculateModifierDamage(baseAttack, gfx);
+
+      // Apply damage to character health
+      final currentHealth = (characterState['health'] as num?) ?? 0;
+      characterState['health'] = currentHealth - damage;
+
+      // Store drawn card info for the web UI to display
+      command['_drawnCard'] = gfx;
+      command['_finalDamage'] = damage;
+
+      print('Command processor: drew "$gfx", base $baseAttack, final damage $damage');
+
     default:
       print('Command processor: unknown action "$action"');
       return null;
   }
 
   return jsonEncode(state);
+}
+
+/// Calculate final damage from a modifier card.
+int _calculateModifierDamage(num baseAttack, String gfx) {
+  // Null/miss
+  if (gfx == 'nullAttack' || gfx == 'null') return 0;
+
+  // Double attack
+  if (gfx == 'doubleAttack' || gfx == 'double') return (baseAttack * 2).toInt();
+
+  // Curse = miss
+  if (gfx == 'curse') return 0;
+
+  // Bless = double
+  if (gfx == 'bless') return (baseAttack * 2).toInt();
+
+  // Plus/minus cards: extract number from gfx string
+  final plusMatch = RegExp(r'plus(\d+)').firstMatch(gfx);
+  if (plusMatch != null) {
+    return baseAttack.toInt() + int.parse(plusMatch.group(1)!);
+  }
+
+  final minusMatch = RegExp(r'minus(\d+)').firstMatch(gfx);
+  if (minusMatch != null) {
+    return (baseAttack.toInt() - int.parse(minusMatch.group(1)!)).clamp(0, 999);
+  }
+
+  // Unknown card type — just apply base
+  return baseAttack.toInt();
 }

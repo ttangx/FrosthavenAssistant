@@ -33,6 +33,7 @@ const Map<String, List<String>> _actionRequiredFields = {
   'removeStatusEffect': ['action', 'characterId', 'effect'],
   'addXP': ['action', 'characterId', 'value'],
   'pushSubscribe': ['action', 'characterId', 'subscription'],
+  'drawModifier': ['action', 'characterId', 'baseAttack'],
 };
 
 /// Returns the required fields for a given action, or null if unsupported.
@@ -69,6 +70,9 @@ String describeAction(Map<String, dynamic> message) {
       return '$characterId: add $value XP';
     case 'pushSubscribe':
       return '$characterId: push subscribe';
+    case 'drawModifier':
+      final baseAttack = message['baseAttack'];
+      return '$characterId: draw modifier (base attack $baseAttack)';
     default:
       return 'Unknown action: $action';
   }
