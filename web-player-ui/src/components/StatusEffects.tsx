@@ -82,12 +82,12 @@ export default function StatusEffects({
           width: 30px;
           height: 30px;
           object-fit: contain;
-          filter: brightness(1.4) drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+          filter: brightness(1.8) contrast(1.2) drop-shadow(0 1px 3px rgba(0,0,0,0.4));
         }
 
         .condition-badge--inactive .condition-badge__icon {
-          opacity: 0.6;
-          filter: brightness(1.1) saturate(0.5) drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+          opacity: 0.75;
+          filter: brightness(1.5) contrast(1.1) drop-shadow(0 1px 2px rgba(0,0,0,0.3));
         }
 
         .condition-badge--inactive {
@@ -110,7 +110,7 @@ export default function StatusEffects({
 
         .condition-badge--active .condition-badge__icon {
           opacity: 1;
-          filter: brightness(1.6) drop-shadow(0 0 5px rgba(91, 189, 213, 0.5)) drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+          filter: brightness(2) contrast(1.2) drop-shadow(0 0 5px rgba(91, 189, 213, 0.5)) drop-shadow(0 1px 2px rgba(0,0,0,0.3));
         }
 
         .condition-badge--active:hover {
