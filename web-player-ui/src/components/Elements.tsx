@@ -7,12 +7,12 @@ interface ElementsProps {
 }
 
 const ELEMENTS = [
-  { index: 0, name: 'fire', icon: '/icons/element-fire-color.png' },
-  { index: 1, name: 'ice', icon: '/icons/element-ice-color.png' },
-  { index: 2, name: 'air', icon: '/icons/element-air-color.png' },
-  { index: 3, name: 'earth', icon: '/icons/element-earth-color.png' },
-  { index: 4, name: 'light', icon: '/icons/element-light-color.png' },
-  { index: 5, name: 'dark', icon: '/icons/element-dark-color.png' },
+  { index: 0, name: 'fire', icon: '/icons/element-fire-token.png' },
+  { index: 1, name: 'ice', icon: '/icons/element-ice-token.png' },
+  { index: 2, name: 'air', icon: '/icons/element-air-token.png' },
+  { index: 3, name: 'earth', icon: '/icons/element-earth-token.png' },
+  { index: 4, name: 'light', icon: '/icons/element-light-token.png' },
+  { index: 5, name: 'dark', icon: '/icons/element-dark-token.png' },
 ];
 
 // Cycle: inert(2) -> full(0) -> half(1) -> inert(2)
@@ -48,15 +48,15 @@ export default function Elements({
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 40px;
-          height: 40px;
-          min-height: 40px;
-          min-width: 40px;
+          width: 42px;
+          height: 42px;
+          min-height: 42px;
+          min-width: 42px;
           padding: 0;
           border-radius: 50%;
-          border: 2px solid transparent;
-          background: var(--color-panel-dark);
-          box-shadow: var(--shadow-inset);
+          border: none;
+          background: transparent;
+          box-shadow: none;
           cursor: pointer;
           transition: all var(--transition);
         }
@@ -67,8 +67,8 @@ export default function Elements({
         }
 
         .element-btn__icon {
-          width: 24px;
-          height: 24px;
+          width: 38px;
+          height: 38px;
           object-fit: contain;
           transition: all var(--transition);
         }
