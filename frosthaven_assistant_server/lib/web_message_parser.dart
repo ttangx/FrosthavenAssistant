@@ -34,6 +34,7 @@ const Map<String, List<String>> _actionRequiredFields = {
   'addXP': ['action', 'characterId', 'value'],
   'pushSubscribe': ['action', 'characterId', 'subscription'],
   'drawModifier': ['action', 'characterId', 'baseAttack'],
+  'setElement': ['action', 'element', 'state'],
   'clientError': ['action', 'error'],
 };
 
@@ -74,6 +75,14 @@ String describeAction(Map<String, dynamic> message) {
     case 'drawModifier':
       final baseAttack = message['baseAttack'];
       return '$characterId: draw modifier (base attack $baseAttack)';
+    case 'setElement':
+      final element = message['element'];
+      final state = message['state'];
+      final names = ['fire','ice','air','earth','light','dark'];
+      final states = ['full','half','inert'];
+      final eName = (element is num && element < names.length) ? names[element as int] : element;
+      final sName = (state is num && state < states.length) ? states[state as int] : state;
+      return 'element: $eName -> $sName';
     case 'clientError':
       final error = message['error'];
       return 'CLIENT ERROR: $error';

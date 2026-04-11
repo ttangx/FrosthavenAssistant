@@ -29,10 +29,16 @@ export interface AbilityDeck {
   discardPile: { nr: number }[];
 }
 
+// Elements: fire(0), ice(1), air(2), earth(3), light(4), dark(5)
+// ElementState: full(0)=infused, half(1)=waning, inert(2)=off
+export type ElementStateValue = 0 | 1 | 2;
+export type ElementStates = Record<string, ElementStateValue>;
+
 export interface GameState {
   characters: Character[];
   monsters: Monster[];
   abilityDecks: AbilityDeck[];
+  elementState: ElementStates;
   round: number;
   roundState: number; // 0 = pre-draw (initiative input), 1+ = round active (turn order revealed)
   currentTurn: number | null;

@@ -6,6 +6,7 @@ import HealthSection from './HealthSection';
 import XPSection from './XPSection';
 import StatusEffects from './StatusEffects';
 import DrawModifier from './DrawModifier';
+import Elements from './Elements';
 
 export default function CharacterSheet({
   character,
@@ -266,7 +267,12 @@ export default function CharacterSheet({
         </div>
       </div>
 
-      <div className="frost-divider" />
+      {/* Elements */}
+      <Elements
+        elementState={gameState.elementState}
+        send={send}
+        isConnected={isConnected}
+      />
 
       {/* Initiative */}
       <InitiativeSection

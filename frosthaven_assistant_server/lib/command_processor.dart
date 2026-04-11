@@ -41,14 +41,29 @@ String? applyCommand(Map<String, dynamic> command, String currentStateJson) {
     return null;
   }
 
+  final action = command['action'] as String;
+
+  // Element commands don't need a character
+  if (action == 'setElement') {
+    final element = command['element'];
+    final newState = command['state'];
+    final elementState = state['elementState'] as Map<String, dynamic>? ?? {};
+    elementState[element.toString()] = newState;
+    state['elementState'] = elementState;
+    return jsonEncode(state);
+  }
+
   final currentList = state['currentList'] as List<dynamic>?;
   if (currentList == null) {
     print('Command processor: no currentList in game state');
     return null;
   }
 
-  final characterId = command['characterId'] as String;
-  final action = command['action'] as String;
+  final characterId = command['characterId'] as String?;
+  if (characterId == null) {
+    print('Command processor: missing characterId');
+    return null;
+  }
 
   // Find the character in currentList by id
   final characterIndex = currentList.indexWhere(
