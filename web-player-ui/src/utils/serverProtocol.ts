@@ -1,4 +1,4 @@
-import type { Character, GameState } from '../types';
+import type { Character, GameState, Monster, AbilityDeck } from '../types';
 
 /** Condition enum index to name (matches Flutter's Condition enum) */
 const CONDITION_NAMES: Record<number, string> = {
@@ -78,11 +78,31 @@ export function parseServerGameState(raw: RawGameState): GameState {
       };
     });
 
+  const monsters: Monster[] = raw.currentList
+    .filter((item) => item.monsterInstances != null)
+    .map((item) => ({
+      id: item.id,
+      turnState: item.turnState,
+      level: (item as any).level ?? 0,
+      instances: ((item as any).monsterInstances ?? []).map((mi: any) => ({
+        standeeNr: mi.standeeNr,
+        type: mi.type,
+        health: mi.health,
+      })),
+    }));
+
+  const abilityDecks: AbilityDeck[] = ((raw as any).currentAbilityDecks ?? []).map((d: any) => ({
+    name: d.name,
+    discardPile: (d.discardPile ?? []).map((c: any) => ({ nr: c.nr })),
+  }));
+
   return {
     characters,
+    monsters,
+    abilityDecks,
     round: raw.round,
     roundState: raw.roundState,
-    currentTurn: null, // Derived from turnState if needed
+    currentTurn: null,
     scenarioName: raw.scenario,
     scenarioLevel: raw.level,
     trapDamage: 0,

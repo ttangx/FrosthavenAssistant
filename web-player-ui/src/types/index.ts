@@ -11,8 +11,28 @@ export interface Character {
   conditions: string[];
 }
 
+export interface MonsterInstance {
+  standeeNr: number;
+  type: number; // 1=normal, 2=elite/boss
+  health: number;
+}
+
+export interface Monster {
+  id: string;
+  turnState: number;
+  level: number;
+  instances: MonsterInstance[];
+}
+
+export interface AbilityDeck {
+  name: string;
+  discardPile: { nr: number }[];
+}
+
 export interface GameState {
   characters: Character[];
+  monsters: Monster[];
+  abilityDecks: AbilityDeck[];
   round: number;
   roundState: number; // 0 = pre-draw (initiative input), 1+ = round active (turn order revealed)
   currentTurn: number | null;
