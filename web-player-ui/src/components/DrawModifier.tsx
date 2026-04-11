@@ -20,7 +20,7 @@ interface AttackData {
 
 interface MonsterOption {
   id: string;
-  type: 'normal' | 'elite' | 'boss';
+  type: string;
   totalAttack: number;
   standeeNr: number;
 }
@@ -70,18 +70,17 @@ export default function DrawModifier({
 
       for (const instance of monster.instances) {
         const levelStats = monsterData?.levels?.[String(monster.level)];
-        // Boss monsters (type 2 with only boss stats) vs normal/elite
-        const isBoss = levelStats?.boss !== undefined && levelStats?.normal === undefined;
-        const baseAttack = isBoss
+        // type: 0=normal, 1=elite, 2=boss
+        const baseAttack = instance.type === 2
           ? (levelStats?.boss ?? 0)
-          : instance.type === 2
-            ? (levelStats?.elite ?? 0)
+          : instance.type === 1
+            ? (levelStats?.elite ?? levelStats?.boss ?? 0)
             : (levelStats?.normal ?? 0);
         const total = Math.max(0, baseAttack + abilityMod);
 
         options.push({
           id: monster.id,
-          type: instance.type === 2 ? 'elite' : 'normal',
+          type: instance.type === 2 ? 'boss' : instance.type === 1 ? 'elite' : 'normal',
           totalAttack: total,
           standeeNr: instance.standeeNr,
         });
