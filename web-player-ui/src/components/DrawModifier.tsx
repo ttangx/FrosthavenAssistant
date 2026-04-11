@@ -21,6 +21,7 @@ interface MonsterOption {
   abilityMod: number;
   totalAttack: number;
   standeeNr: number;
+  isActive: boolean;
 }
 
 // Raw game state types for monsters
@@ -103,7 +104,12 @@ export default function DrawModifier({
 
     const options: MonsterOption[] = [];
 
-    for (const monster of rawMonsters) {
+    // Sort: active monster first (turnState 1), then not yet gone (0), skip done (2)
+    const relevantMonsters = rawMonsters
+      .filter((m: any) => m.turnState <= 1)
+      .sort((a: any, b: any) => (b.turnState === 1 ? 1 : 0) - (a.turnState === 1 ? 1 : 0));
+
+    for (const monster of relevantMonsters) {
       const monsterId = monster.id as string;
       const monsterLevel = (monster.level as number) ?? 0;
       const stats = attackData.monsterStats[monsterId];
@@ -131,6 +137,7 @@ export default function DrawModifier({
           abilityMod,
           totalAttack: total,
           standeeNr: mi.standeeNr,
+          isActive: monster.turnState === 1,
         });
       }
     }
@@ -206,6 +213,25 @@ export default function DrawModifier({
           min-width: 30px;
           text-align: center;
         }
+
+        .draw-modifier__btn--inactive {
+          opacity: 0.45;
+          background: linear-gradient(180deg, #5a4040 0%, #3a2828 100%);
+        }
+
+        .draw-modifier__btn--active {
+          border-color: rgba(255, 200, 100, 0.4);
+          box-shadow: 0 0 8px rgba(217, 64, 64, 0.3);
+        }
+
+        .draw-modifier__active-label {
+          font-family: var(--font-condensed);
+          font-size: 0.6rem;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: var(--color-xp);
+          margin-left: 0.4rem;
+        }
       `}</style>
 
       <h3 className="draw-modifier__heading">Draw Against Me</h3>
@@ -214,7 +240,7 @@ export default function DrawModifier({
         {monsterOptions.map((opt) => (
           <button
             key={`${opt.id}-${opt.standeeNr}`}
-            className="draw-modifier__btn"
+            className={`draw-modifier__btn ${opt.isActive ? 'draw-modifier__btn--active' : 'draw-modifier__btn--inactive'}`}
             onClick={() => handleDraw(opt)}
             disabled={!isConnected}
           >
@@ -225,6 +251,7 @@ export default function DrawModifier({
               <span className="draw-modifier__type">
                 ({opt.type})
               </span>
+              {opt.isActive && <span className="draw-modifier__active-label">ACTIVE</span>}
             </div>
             <span className="draw-modifier__attack">
               {opt.totalAttack}
