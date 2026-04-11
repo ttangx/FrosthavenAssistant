@@ -29,7 +29,7 @@ wp.sendNotification(${subscriptionJson}, ${jsonEncode(payload)})
 ''';
 
   try {
-    final result = await Process.run('node', ['-e', script]);
+    final result = await Process.run('node', ['-e', script], workingDirectory: '/opt/frosthaven');
     if (result.exitCode != 0) {
       print('Push error: ${result.stderr}');
       return false;
