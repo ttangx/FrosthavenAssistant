@@ -42,6 +42,7 @@ export default function DrawModifier({
   isConnected,
 }: DrawModifierProps) {
   const isPoisoned = conditions.includes('poisoned');
+  const isBrittle = conditions.includes('brittle');
   const [attackData, setAttackData] = useState<AttackData | null>(null);
   const [options, setOptions] = useState<AttackOption[]>([]);
 
@@ -90,12 +91,18 @@ export default function DrawModifier({
     setOptions(newOptions);
   }, [attackData, gameState]);
 
+  const getFinalAttack = (base: number) => {
+    let attack = base;
+    if (isPoisoned) attack += 1;
+    if (isBrittle) attack *= 2;
+    return attack;
+  };
+
   const handleDraw = (opt: AttackOption) => {
-    const attack = isPoisoned ? opt.totalAttack + 1 : opt.totalAttack;
     send({
       action: 'drawModifier',
       characterId,
-      baseAttack: attack,
+      baseAttack: getFinalAttack(opt.totalAttack),
     });
   };
 
@@ -180,9 +187,15 @@ export default function DrawModifier({
           >
             <span className="draw-modifier__type">{opt.type}</span>
             <span className="draw-modifier__attack">
-              {isPoisoned ? opt.totalAttack + 1 : opt.totalAttack}
-              {isPoisoned && <span style={{ fontSize: '0.6rem', opacity: 0.7 }}> +1</span>}
+              {getFinalAttack(opt.totalAttack)}
             </span>
+            {(isPoisoned || isBrittle) && (
+              <span style={{ fontSize: '0.55rem', opacity: 0.7, lineHeight: 1 }}>
+                {isPoisoned && '+1 poison'}
+                {isPoisoned && isBrittle && ' '}
+                {isBrittle && 'x2 brittle'}
+              </span>
+            )}
           </button>
         ))}
       </div>
