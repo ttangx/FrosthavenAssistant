@@ -51,7 +51,11 @@ export default function ConnectionStatus({
         className={`connection-dot ${isConnected ? 'connection-dot--connected' : 'connection-dot--disconnected'}`}
       />
       <span className="connection-label">
-        {isConnected ? 'Connected' : 'Disconnected'}
+        {isConnected
+          ? 'Connected'
+          : navigator.onLine
+            ? 'Reconnecting…'
+            : 'Offline'}
       </span>
       {error && <span className="connection-error">{error}</span>}
     </div>

@@ -36,6 +36,7 @@ const Map<String, List<String>> _actionRequiredFields = {
   'drawModifier': ['action', 'characterId', 'baseAttack'],
   'setElement': ['action', 'element', 'state'],
   'clientError': ['action', 'error'],
+  'ping': ['action'],
 };
 
 /// Returns the required fields for a given action, or null if unsupported.
@@ -86,6 +87,8 @@ String describeAction(Map<String, dynamic> message) {
     case 'clientError':
       final error = message['error'];
       return 'CLIENT ERROR: $error';
+    case 'ping':
+      return 'ping';
     default:
       return 'Unknown action: $action';
   }

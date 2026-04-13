@@ -75,6 +75,16 @@ class WebSocketHandler {
         return;
       }
 
+      if (action == 'ping') {
+        // Respond with pong to keep connection alive
+        try {
+          channel.sink.add('{"type":"pong"}');
+        } catch (e) {
+          print('Failed to send pong: $e');
+        }
+        return;
+      }
+
       if (action == 'clientError') {
         final error = message['error'] as String? ?? 'unknown';
         final stack = message['stack'] as String? ?? '';
