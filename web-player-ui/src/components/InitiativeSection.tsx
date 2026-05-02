@@ -49,14 +49,24 @@ export default function InitiativeSection({
   // Send repeating browser notification when player is last to enter initiative
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
-    if (isLastToEnter && Notification.permission === 'granted') {
-      // Fire immediately
-      new Notification('Frosthaven', { body: 'Waiting on your initiative!' });
-      // Then every 30 seconds
-      intervalRef.current = setInterval(() => {
-        new Notification('Frosthaven', { body: 'Still waiting on your initiative!' });
-      }, 15000);
-    }
+    if (!isLastToEnter || Notification.permission !== 'granted') return;
+
+    // Mobile Chrome disallows `new Notification()` — must go through the SW registration.
+    const notify = (body: string) => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then((reg) => {
+          reg.showNotification('Frosthaven', { body, tag: 'initiative-nudge' });
+        }).catch(() => {});
+      } else {
+        new Notification('Frosthaven', { body });
+      }
+    };
+
+    notify('Waiting on your initiative!');
+    intervalRef.current = setInterval(() => {
+      notify('Still waiting on your initiative!');
+    }, 15000);
+
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
