@@ -7,6 +7,7 @@ import XPSection from './XPSection';
 import StatusEffects from './StatusEffects';
 import DrawModifier from './DrawModifier';
 import Elements from './Elements';
+import MonsterDetails from './MonsterDetails';
 
 export default function CharacterSheet({
   character,
@@ -311,6 +312,9 @@ export default function CharacterSheet({
         send={send}
         isConnected={isConnected}
       />
+
+      {/* Monster Details (collapsible) */}
+      <MonsterDetails gameState={gameState} />
 
       {/* Scenario Info (collapsible) */}
       <div className="card">
