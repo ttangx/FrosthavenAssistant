@@ -21,6 +21,14 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/canonical/ubuntu/server/24.04/stable/current/arm64/hvm/ebs-gp3/ami-id
     Description: Ubuntu 24.04 ARM64 AMI (resolved via SSM parameter)
+  GitBranch:
+    Type: String
+    Default: main
+    Description: Git branch to clone and deploy
+  GitRepoUrl:
+    Type: String
+    Default: https://github.com/Tarmslitaren/FrosthavenAssistant.git
+    Description: Git repository URL to clone
 
 Resources:
   InstanceRole:
@@ -112,10 +120,10 @@ Resources:
           curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
           apt-get install -y nodejs
 
-          echo "=== Cloning repository ==="
+          echo "=== Cloning repository (branch: ${GitBranch}) ==="
           mkdir -p /opt/frosthaven/web
           cd /tmp
-          git clone --depth 1 https://github.com/Tarmslitaren/FrosthavenAssistant.git
+          git clone --depth 1 -b ${GitBranch} ${GitRepoUrl}
 
           echo "=== Building game server ==="
           cd /tmp/FrosthavenAssistant/frosthaven_assistant_server
