@@ -1,117 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frosthaven_assistant/Resource/commands/imbue_element_command.dart';
-import 'package:frosthaven_assistant/Resource/commands/next_turn_command.dart';
-import 'package:frosthaven_assistant/Resource/commands/use_element_command.dart';
 import 'package:frosthaven_assistant/Resource/enums.dart';
-import 'package:frosthaven_assistant/Resource/game_actions.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
 import 'package:frosthaven_assistant/Resource/ui_utils.dart';
 
-import '../../services/service_locator.dart';
+import 'view_models/global_hotkeys_view_model.dart';
 
-class GlobalHotkeys extends StatelessWidget {
-  const GlobalHotkeys({required this.child, super.key});
+// Wraps a SingleActivator so it only fires when no text field is focused.
+// CallbackShortcuts consumes key events before calling callbacks, so the
+// focus check must live in accepts() rather than in the callback itself.
+class _NoTextFieldActivator implements ShortcutActivator {
+  const _NoTextFieldActivator(this._inner);
 
-  final Widget child;
+  final SingleActivator _inner;
 
-  void _runIfNoTextInputFocus(VoidCallback action) {
-    if (_isTextInputFocused()) return;
-    action();
-  }
-
-  bool _isTextInputFocused() {
+  static bool _isTextInputFocused() {
     final focusedContext = FocusManager.instance.primaryFocus?.context;
-    if (focusedContext == null) {
-      return false;
-    }
-
+    if (focusedContext == null) return false;
     return focusedContext.widget is EditableText ||
         focusedContext.findAncestorWidgetOfExactType<EditableText>() != null;
   }
 
-  void _invokeDrawOrNextRound(BuildContext context) {
-    final gameState = getIt<GameState>();
-
-    final result = runDrawOrNextRoundAction(gameState);
-    final blockedMessage = result.blockedMessage;
-
-    if (blockedMessage != null) {
-      showToast(context, blockedMessage);
-    }
-  }
-
-  void _toggleElement(Elements element) {
-    final gameState = getIt<GameState>();
-    final elementState = gameState.elementState[element];
-
-    if (elementState == ElementState.half ||
-        elementState == ElementState.full) {
-      gameState.action(UseElementCommand(element));
-      return;
-    }
-
-    gameState.action(ImbueElementCommand(element, false));
-  }
-
-  void _advanceActivation() {
-    final gameState = getIt<GameState>();
-    if (gameState.roundState.value != RoundState.playTurns) {
-      return;
-    }
-
-    for (final item in gameState.currentList) {
-      if (item.turnState.value == TurnsState.current) {
-        gameState.action(TurnDoneCommand(item.id));
-        return;
-      }
-    }
-  }
-
-  void _undoActivation() {
-    final gameState = getIt<GameState>();
-    final currentCommandIndex = gameState.commandIndex.value;
-
-    if (currentCommandIndex < 0 ||
-        currentCommandIndex >= gameState.commands.length) {
-      return;
-    }
-
-    if (gameState.commands[currentCommandIndex] is TurnDoneCommand) {
-      gameState.undo();
-    }
+  @override
+  bool accepts(KeyEvent event, HardwareKeyboard state) {
+    if (_isTextInputFocused()) return false;
+    return _inner.accepts(event, state);
   }
 
   @override
+  String debugDescribeKeys() => _inner.debugDescribeKeys();
+
+  @override
+  Iterable<LogicalKeyboardKey>? get triggers => _inner.triggers;
+}
+
+class GlobalHotkeys extends StatelessWidget {
+  const GlobalHotkeys({required this.child, super.key, this.gameState});
+
+  final Widget child;
+  final GameState? gameState;
+
+  @override
   Widget build(BuildContext context) {
+    final vm = GlobalHotkeysViewModel(gameState: gameState);
     return CallbackShortcuts(
       bindings: <ShortcutActivator, VoidCallback>{
-        const SingleActivator(LogicalKeyboardKey.keyZ, control: true): () =>
-            _runIfNoTextInputFocus(() => getIt<GameState>().undo()),
-        const SingleActivator(LogicalKeyboardKey.keyZ, meta: true): () =>
-            _runIfNoTextInputFocus(() => getIt<GameState>().undo()),
-        const SingleActivator(LogicalKeyboardKey.keyY, control: true): () =>
-            _runIfNoTextInputFocus(() => getIt<GameState>().redo()),
-        const SingleActivator(LogicalKeyboardKey.keyY, meta: true): () =>
-            _runIfNoTextInputFocus(() => getIt<GameState>().redo()),
-        const SingleActivator(LogicalKeyboardKey.tab): () =>
-            _runIfNoTextInputFocus(_advanceActivation),
-        const SingleActivator(LogicalKeyboardKey.tab, shift: true): () =>
-            _runIfNoTextInputFocus(_undoActivation),
-        const SingleActivator(LogicalKeyboardKey.space): () =>
-            _runIfNoTextInputFocus(() => _invokeDrawOrNextRound(context)),
-        const SingleActivator(LogicalKeyboardKey.digit1): () =>
-            _runIfNoTextInputFocus(() => _toggleElement(Elements.fire)),
-        const SingleActivator(LogicalKeyboardKey.digit2): () =>
-            _runIfNoTextInputFocus(() => _toggleElement(Elements.ice)),
-        const SingleActivator(LogicalKeyboardKey.digit3): () =>
-            _runIfNoTextInputFocus(() => _toggleElement(Elements.air)),
-        const SingleActivator(LogicalKeyboardKey.digit4): () =>
-            _runIfNoTextInputFocus(() => _toggleElement(Elements.earth)),
-        const SingleActivator(LogicalKeyboardKey.digit5): () =>
-            _runIfNoTextInputFocus(() => _toggleElement(Elements.light)),
-        const SingleActivator(LogicalKeyboardKey.digit6): () =>
-            _runIfNoTextInputFocus(() => _toggleElement(Elements.dark)),
+        const SingleActivator(LogicalKeyboardKey.keyZ, control: true):
+            vm.undo,
+        const SingleActivator(LogicalKeyboardKey.keyZ, meta: true): vm.undo,
+        const SingleActivator(LogicalKeyboardKey.keyY, control: true):
+            vm.redo,
+        const SingleActivator(LogicalKeyboardKey.keyY, meta: true): vm.redo,
+        const _NoTextFieldActivator(
+          SingleActivator(LogicalKeyboardKey.tab),
+        ): vm.advanceActivation,
+        const _NoTextFieldActivator(
+          SingleActivator(LogicalKeyboardKey.tab, shift: true),
+        ): vm.undoActivation,
+        const _NoTextFieldActivator(
+          SingleActivator(LogicalKeyboardKey.space),
+        ): () {
+          final msg = vm.invokeDrawOrNextRound();
+          if (msg != null) showToast(context, msg);
+        },
+        const _NoTextFieldActivator(
+          SingleActivator(LogicalKeyboardKey.digit1),
+        ): () => vm.toggleElement(Elements.fire),
+        const _NoTextFieldActivator(
+          SingleActivator(LogicalKeyboardKey.digit2),
+        ): () => vm.toggleElement(Elements.ice),
+        const _NoTextFieldActivator(
+          SingleActivator(LogicalKeyboardKey.digit3),
+        ): () => vm.toggleElement(Elements.air),
+        const _NoTextFieldActivator(
+          SingleActivator(LogicalKeyboardKey.digit4),
+        ): () => vm.toggleElement(Elements.earth),
+        const _NoTextFieldActivator(
+          SingleActivator(LogicalKeyboardKey.digit5),
+        ): () => vm.toggleElement(Elements.light),
+        const _NoTextFieldActivator(
+          SingleActivator(LogicalKeyboardKey.digit6),
+        ): () => vm.toggleElement(Elements.dark),
       },
       child: child,
     );

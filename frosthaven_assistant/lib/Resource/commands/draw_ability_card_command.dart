@@ -1,5 +1,8 @@
+import 'package:collection/collection.dart';
+
 import '../game_methods.dart';
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class DrawAbilityCardCommand extends Command {
   final String ownerId;
@@ -7,9 +10,11 @@ class DrawAbilityCardCommand extends Command {
 
   @override
   void execute() {
-    Monster monster = GameMethods.getCurrentMonsters()
-        .firstWhere((element) => element.id == ownerId);
-    MonsterAbilityState deck = GameMethods.getDeck(monster.type.deck)!;
+    final Monster? monster = GameMethods.getCurrentMonsters()
+        .firstWhereOrNull((element) => element.id == ownerId);
+    if (monster == null) return;
+    final MonsterAbilityState? deck = GameMethods.getDeck(monster.type.deck);
+    if (deck == null) return;
     if (deck.drawPileIsNotEmpty) {
       deck.draw(stateAccess);
     }
@@ -17,6 +22,6 @@ class DrawAbilityCardCommand extends Command {
 
   @override
   String describe() {
-    return "Draw extra ability card";
+    return commandL10n.cmdDrawExtraAbilityCard;
   }
 }

@@ -1,17 +1,19 @@
-import '../../services/service_locator.dart';
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class AMDImbue2Command extends Command {
-  AMDImbue2Command();
+  final GameState _gameState;
+
+  AMDImbue2Command({required GameState gameState}) : _gameState = gameState;
 
   @override
   void execute() {
-    ModifierDeck deck = getIt<GameState>().modifierDeck;
+    ModifierDeck deck = _gameState.modifierDeck;
     deck.setImbue2(stateAccess);
   }
 
   @override
   String describe() {
-    return "Advanced Imbue Monster Deck";
+    return commandL10n.cmdAdvancedImbueMonsterDeck;
   }
 }

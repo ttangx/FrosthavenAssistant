@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:frosthaven_assistant/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frosthaven_assistant/Layout/menus/save_menu.dart';
 import 'package:frosthaven_assistant/Layout/menus/save_modal_menu.dart';
@@ -18,6 +20,12 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('en')],
         home: Builder(
           builder: (context) => ElevatedButton(
             onPressed: () {
@@ -71,7 +79,7 @@ void main() {
     testWidgets('shows existing saves in list', (WidgetTester tester) async {
       final settings = getIt<Settings>();
       // Add a save entry to the settings
-      final saves = Map<String, String>.from(settings.saves.value);
+      final saves = Map<String, String>.of(settings.saves.value);
       saves['TestSave1'] = 'somedata';
       settings.saves.value = saves;
 
@@ -87,7 +95,7 @@ void main() {
       expect(find.byType(SaveModalMenu), findsOneWidget);
 
       // cleanup
-      final cleanSaves = Map<String, String>.from(settings.saves.value);
+      final cleanSaves = Map<String, String>.of(settings.saves.value);
       cleanSaves.remove('TestSave1');
       settings.saves.value = cleanSaves;
     });

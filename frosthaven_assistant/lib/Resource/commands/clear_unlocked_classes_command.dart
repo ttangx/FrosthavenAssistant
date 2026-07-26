@@ -1,15 +1,16 @@
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class ClearUnlockedClassesCommand extends Command {
   ClearUnlockedClassesCommand();
 
   @override
   void execute() {
-    MutableGameMethods.clearUnlockedClasses(stateAccess);
+    ScenarioMethods.clearUnlockedClasses(stateAccess);
   }
 
   @override
   String describe() {
-    return "clear unlocked classes";
+    return commandL10n.cmdClearUnlockedClasses;
   }
 }

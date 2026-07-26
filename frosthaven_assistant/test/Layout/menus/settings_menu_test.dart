@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:frosthaven_assistant/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:frosthaven_assistant/Layout/menus/SettingsMenu/settings_menu.dart';
 import 'package:frosthaven_assistant/Layout/menus/save_menu.dart';
-import 'package:frosthaven_assistant/Layout/menus/settings_menu.dart';
 import 'package:frosthaven_assistant/Resource/commands/set_ally_deck_in_og_gloom_command.dart';
 import 'package:frosthaven_assistant/Resource/enums.dart';
 import 'package:frosthaven_assistant/Resource/settings.dart';
@@ -21,6 +23,12 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('en')],
         home: Builder(
           builder: (context) => ElevatedButton(
             onPressed: () {
@@ -77,8 +85,8 @@ void main() {
       final before = settings.expireConditions.value;
       await pumpMenu(tester);
 
-      await tester.tap(
-          find.widgetWithText(CheckboxListTile, 'Expire Conditions'));
+      await tester
+          .tap(find.widgetWithText(CheckboxListTile, 'Expire Conditions'));
       await tester.pump();
 
       expect(settings.expireConditions.value, !before);
@@ -133,8 +141,9 @@ void main() {
       final before = settings.randomStandees.value;
       await pumpMenu(tester);
 
-      await tester
-          .tap(find.widgetWithText(CheckboxListTile, 'Random Standees'));
+      final finder = find.widgetWithText(CheckboxListTile, 'Random Standees');
+      await tester.ensureVisible(finder);
+      await tester.tap(finder);
       await tester.pump();
 
       expect(settings.randomStandees.value, !before);
@@ -194,8 +203,7 @@ void main() {
       final before = settings.hideLootDeck.value;
       await pumpMenu(tester);
 
-      final finder =
-          find.widgetWithText(CheckboxListTile, 'Hide Loot Deck');
+      final finder = find.widgetWithText(CheckboxListTile, 'Hide Loot Deck');
       await tester.ensureVisible(finder);
       await tester.tap(finder);
       await tester.pump();
@@ -268,15 +276,14 @@ void main() {
       settings.showCustomContent.value = before;
     });
 
-    testWidgets(
-        'tapping Show Sections in Main Screen checkbox toggles setting',
+    testWidgets('tapping Show Sections in Main Screen checkbox toggles setting',
         (WidgetTester tester) async {
       final settings = getIt<Settings>();
       final before = settings.showSectionsInMainView.value;
       await pumpMenu(tester);
 
-      final finder = find.widgetWithText(
-          CheckboxListTile, 'Show Sections in Main Screen');
+      final finder =
+          find.widgetWithText(CheckboxListTile, 'Show Sections in Main Screen');
       await tester.ensureVisible(finder);
       await tester.tap(finder);
       await tester.pump();
@@ -359,12 +366,14 @@ void main() {
         (WidgetTester tester) async {
       await pumpMenu(tester);
 
-      final finder = find.widgetWithText(
-          ListTile, 'Clear unlocked characters and stuff');
+      final finder =
+          find.widgetWithText(ListTile, 'Clear unlocked characters and stuff');
       await tester.ensureVisible(finder);
       await tester.tap(finder);
       await tester.pump();
-      // Just verify the tap didn't throw
+      expect(
+          find.widgetWithText(ListTile, 'Clear unlocked characters and stuff'),
+          findsOneWidget);
     });
 
     testWidgets('tapping Load/Save State opens SaveMenu',
@@ -379,7 +388,8 @@ void main() {
       expect(find.byType(SaveMenu), findsOneWidget);
     });
 
-    testWidgets('tapping Use Ally AMD in OG Gloomhaven checkbox toggles setting',
+    testWidgets(
+        'tapping Use Ally AMD in OG Gloomhaven checkbox toggles setting',
         (WidgetTester tester) async {
       final gameState = getIt<GameState>();
       final before = gameState.allyDeckInOGGloom.value;
@@ -393,7 +403,52 @@ void main() {
 
       expect(gameState.allyDeckInOGGloom.value, !before);
       // restore
-      getIt<GameState>().action(SetAllyDeckInOgGloomCommand(before));
+      getIt<GameState>().action(
+          SetAllyDeckInOgGloomCommand(before, gameState: getIt<GameState>()));
+    });
+
+    testWidgets('moving the Main List Scaling slider rebuilds the board',
+        (WidgetTester tester) async {
+      final gameState = getIt<GameState>();
+      final settings = getIt<Settings>();
+      final before = settings.userScalingMainList.value;
+      int notifications = 0;
+      void listener() => notifications++;
+      gameState.updateList.addListener(listener);
+      addTearDown(() => gameState.updateList.removeListener(listener));
+
+      await pumpMenu(tester);
+      final slider = find.byType(Slider).first; // Main List Scaling
+      await tester.ensureVisible(slider);
+      await tester.drag(slider, const Offset(-40, 0));
+      await tester.pump();
+
+      expect(notifications, greaterThan(0),
+          reason:
+              'changing the main-list scale must notify the board to rebuild');
+      settings.userScalingMainList.value = before;
+    });
+
+    testWidgets('moving the App Bar Scaling slider rebuilds the board',
+        (WidgetTester tester) async {
+      final gameState = getIt<GameState>();
+      final settings = getIt<Settings>();
+      final before = settings.userScalingBars.value;
+      int notifications = 0;
+      void listener() => notifications++;
+      gameState.updateList.addListener(listener);
+      addTearDown(() => gameState.updateList.removeListener(listener));
+
+      await pumpMenu(tester);
+      final slider = find.byType(Slider).at(1); // App Bar Scaling
+      await tester.ensureVisible(slider);
+      await tester.drag(slider, const Offset(-40, 0));
+      await tester.pump();
+
+      expect(notifications, greaterThan(0),
+          reason:
+              'changing the app-bar scale must notify the board to rebuild');
+      settings.userScalingBars.value = before;
     });
   });
 }

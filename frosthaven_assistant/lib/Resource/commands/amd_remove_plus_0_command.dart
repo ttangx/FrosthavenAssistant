@@ -1,15 +1,18 @@
-import '../../services/service_locator.dart';
 import '../game_methods.dart';
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class AmdRemovePlus0Command extends Command {
   final String name;
   final bool remove;
-  AmdRemovePlus0Command(this.name, this.remove);
+  final GameState _gameState;
+
+  AmdRemovePlus0Command(this.name, this.remove, {required GameState gameState})
+      : _gameState = gameState;
 
   @override
   void execute() {
-    final deck = GameMethods.getModifierDeck(name, getIt<GameState>());
+    final deck = GameMethods.getModifierDeck(name, _gameState);
     if (remove) {
       deck.moveCardToRemovedPile(stateAccess, "plus0");
     } else {
@@ -19,6 +22,6 @@ class AmdRemovePlus0Command extends Command {
 
   @override
   String describe() {
-    return remove ? "Remove plus zero" : "Add back plus zero";
+    return remove ? commandL10n.cmdRemovePlusZero : commandL10n.cmdAddBackPlusZero;
   }
 }

@@ -1,21 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:frosthaven_assistant/Layout/components/menu_card.dart';
+import 'package:frosthaven_assistant/Layout/widgets/menu_card.dart';
 import 'package:frosthaven_assistant/Resource/app_constants.dart';
+import 'package:frosthaven_assistant/l10n/app_localizations.dart';
 
 import '../../Resource/commands/remove_monster_command.dart';
 import '../../Resource/game_methods.dart';
 import '../../Resource/state/game_state.dart';
 import '../../services/service_locator.dart';
+import '../../services/translation_service.dart';
 
 class RemoveMonsterMenu extends StatefulWidget {
-  const RemoveMonsterMenu({super.key});
+  const RemoveMonsterMenu({
+    super.key,
+    this.gameState,
+  });
+
+  final GameState? gameState;
 
   @override
   RemoveMonsterMenuState createState() => RemoveMonsterMenuState();
 }
 
 class RemoveMonsterMenuState extends State<RemoveMonsterMenu> {
-  final GameState _gameState = getIt<GameState>();
+  static const double _kMaxWidth = 450;
+  static const double _kIconHeight = 30;
+
+  GameState get _gameState => widget.gameState ?? getIt<GameState>();
 
   @override
   initState() {
@@ -27,16 +37,20 @@ class RemoveMonsterMenuState extends State<RemoveMonsterMenu> {
   Widget build(BuildContext context) {
     List<Monster> currentMonsters = GameMethods.getCurrentMonsters();
     return MenuCard(
-        maxWidth: 450,
+        maxWidth: _kMaxWidth,
         child: Column(
           children: [
             const SizedBox(
               height: 20,
             ),
             ListTile(
-              title: const Text("Remove All", style: kTitleStyle),
+              title: Text(AppLocalizations.of(context)!.removeAll,
+                  style: kTitleStyle),
               onTap: () {
-                _gameState.action(RemoveMonsterCommand(currentMonsters)); //
+                if (GameMethods.getCurrentMonsters(gameState: _gameState).isNotEmpty) {
+                  _gameState.action(RemoveMonsterCommand(currentMonsters,
+                    gameState: _gameState)); //
+                }
                 Navigator.pop(context);
               },
             ),
@@ -46,18 +60,18 @@ class RemoveMonsterMenuState extends State<RemoveMonsterMenu> {
                 itemBuilder: (context, index) => ListTile(
                   leading: Image.asset(
                     cacheHeight: kMonsterImageCacheHeight,
-                    height: 30,
+                    height: _kIconHeight,
                     "assets/images/monsters/${currentMonsters[index].type.gfx}.png",
                   ),
-                  title: Text(currentMonsters[index].type.display,
+                  title: Text(getIt<TranslationService>().t(currentMonsters[index].type.display),
                       style: kTitleStyle),
                   trailing: Text("(${currentMonsters[index].type.edition})",
-                      style:
-                          kSubtitleStyle),
+                      style: kSubtitleStyle),
                   onTap: () {
                     setState(() {
-                      _gameState.action(
-                          RemoveMonsterCommand([currentMonsters[index]]));
+                      _gameState.action(RemoveMonsterCommand(
+                          [currentMonsters[index]],
+                          gameState: _gameState));
                     });
                   },
                 ),

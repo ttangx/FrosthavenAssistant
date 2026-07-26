@@ -1,17 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frosthaven_assistant/Layout/loot_card.dart';
+import 'package:frosthaven_assistant/Layout/loot_card_widget.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
-import 'package:frosthaven_assistant/services/service_locator.dart';
+import 'package:frosthaven_assistant/l10n/app_localizations.dart';
 
 import '../command/test_helpers.dart';
+
+// ignore_for_file: no-magic-number
+
+Widget _l10nApp(Widget home) => MaterialApp(
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('en')],
+      home: home,
+    );
 
 void main() {
   setUpAll(() async {
     await setUpGame();
   });
 
-  LootCard _makeCard({
+  LootCard makeCard({
     int id = 1,
     LootType lootType = LootType.materiel,
     LootBaseValue baseValue = LootBaseValue.one,
@@ -32,30 +45,22 @@ void main() {
 
   group('LootCardWidget buildFront', () {
     testWidgets('renders card front image', (WidgetTester tester) async {
-      final card = _makeCard();
+      final card = makeCard();
       final originalOnError = FlutterError.onError;
       FlutterError.onError = ignoreOverflowErrors;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: LootCardWidget.buildFront(card, 1.0, false),
-          ),
-        ),
+        _l10nApp(Scaffold(body: LootCardFront(card: card, scale: 1.0))),
       );
       FlutterError.onError = originalOnError;
       expect(find.byType(Image), findsAtLeast(1));
     });
 
     testWidgets('money card shows +1 value text', (WidgetTester tester) async {
-      final card = _makeCard(lootType: LootType.materiel);
+      final card = makeCard(lootType: LootType.materiel);
       final originalOnError = FlutterError.onError;
       FlutterError.onError = ignoreOverflowErrors;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: LootCardWidget.buildFront(card, 1.0, false),
-          ),
-        ),
+        _l10nApp(Scaffold(body: LootCardFront(card: card, scale: 1.0))),
       );
       FlutterError.onError = originalOnError;
       // materiel type with baseValue.one should show +1
@@ -64,31 +69,24 @@ void main() {
 
     testWidgets('other type card with no enhancement shows no value text',
         (WidgetTester tester) async {
-      final card = _makeCard(lootType: LootType.other, enhanced: 0);
+      final card = makeCard(lootType: LootType.other, enhanced: 0);
       final originalOnError = FlutterError.onError;
       FlutterError.onError = ignoreOverflowErrors;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: LootCardWidget.buildFront(card, 1.0, false),
-          ),
-        ),
+        _l10nApp(Scaffold(body: LootCardFront(card: card, scale: 1.0))),
       );
       FlutterError.onError = originalOnError;
       // No value text for other type with no enhancement
       expect(find.textContaining('+'), findsNothing);
     });
 
-    testWidgets('enhanced card shows enhanced text', (WidgetTester tester) async {
-      final card = _makeCard(lootType: LootType.other, enhanced: 3);
+    testWidgets('enhanced card shows enhanced text',
+        (WidgetTester tester) async {
+      final card = makeCard(lootType: LootType.other, enhanced: 3);
       final originalOnError = FlutterError.onError;
       FlutterError.onError = ignoreOverflowErrors;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: LootCardWidget.buildFront(card, 1.0, false),
-          ),
-        ),
+        _l10nApp(Scaffold(body: LootCardFront(card: card, scale: 1.0))),
       );
       FlutterError.onError = originalOnError;
       expect(find.textContaining('Enhanced'), findsOneWidget);
@@ -96,15 +94,11 @@ void main() {
 
     testWidgets('card with gfx containing "1418" shows "1418" text',
         (WidgetTester tester) async {
-      final card = _makeCard(gfx: 'loot_1418');
+      final card = makeCard(gfx: 'loot_1418');
       final originalOnError = FlutterError.onError;
       FlutterError.onError = ignoreOverflowErrors;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: LootCardWidget.buildFront(card, 1.0, false),
-          ),
-        ),
+        _l10nApp(Scaffold(body: LootCardFront(card: card, scale: 1.0))),
       );
       FlutterError.onError = originalOnError;
       expect(find.text('1418'), findsOneWidget);
@@ -112,15 +106,11 @@ void main() {
 
     testWidgets('card with gfx containing "1419" shows "1419" text',
         (WidgetTester tester) async {
-      final card = _makeCard(gfx: 'loot_1419');
+      final card = makeCard(gfx: 'loot_1419');
       final originalOnError = FlutterError.onError;
       FlutterError.onError = ignoreOverflowErrors;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: LootCardWidget.buildFront(card, 1.0, false),
-          ),
-        ),
+        _l10nApp(Scaffold(body: LootCardFront(card: card, scale: 1.0))),
       );
       FlutterError.onError = originalOnError;
       expect(find.text('1419'), findsOneWidget);
@@ -128,19 +118,44 @@ void main() {
 
     testWidgets('card with non-empty owner shows owner icon',
         (WidgetTester tester) async {
-      final card = _makeCard(owner: 'Blinkblade');
+      final card = makeCard(owner: 'Blinkblade');
       final originalOnError = FlutterError.onError;
       FlutterError.onError = ignoreOverflowErrors;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: LootCardWidget.buildFront(card, 1.0, false),
-          ),
-        ),
+        _l10nApp(Scaffold(body: LootCardFront(card: card, scale: 1.0))),
       );
       FlutterError.onError = originalOnError;
       // Owner image should be rendered (Image widgets exist)
       expect(find.byType(Image), findsAtLeast(1));
+    });
+
+    testWidgets('owner icon renders drop-shadow stack (blur + translate)',
+        (WidgetTester tester) async {
+      final card = makeCard(owner: 'Blinkblade');
+      final originalOnError = FlutterError.onError;
+      FlutterError.onError = ignoreOverflowErrors;
+      await tester.pumpWidget(
+        _l10nApp(Scaffold(body: LootCardFront(card: card, scale: 1.0))),
+      );
+      FlutterError.onError = originalOnError;
+      // The owner icon's drop-shadow layer is a Transform.translate wrapping
+      // an ImageFiltered (ImageFilter.blur) wrapping a black-tinted Image.
+      // The ImageFiltered is the load-bearing assertion — without it, the
+      // shadow would render crisp and the soft-halo effect would be lost.
+      expect(find.byType(ImageFiltered), findsOneWidget);
+    });
+
+    testWidgets('empty owner does not render drop-shadow stack',
+        (WidgetTester tester) async {
+      final card = makeCard(owner: '');
+      final originalOnError = FlutterError.onError;
+      FlutterError.onError = ignoreOverflowErrors;
+      await tester.pumpWidget(
+        _l10nApp(Scaffold(body: LootCardFront(card: card, scale: 1.0))),
+      );
+      FlutterError.onError = originalOnError;
+      // No owner → no shadow layer
+      expect(find.byType(ImageFiltered), findsNothing);
     });
   });
 
@@ -149,11 +164,7 @@ void main() {
       final originalOnError = FlutterError.onError;
       FlutterError.onError = ignoreOverflowErrors;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: LootCardWidget.buildRear(1.0),
-          ),
-        ),
+        _l10nApp(Scaffold(body: LootCardRear(scale: 1.0))),
       );
       FlutterError.onError = originalOnError;
       expect(find.byType(Image), findsOneWidget);
@@ -163,15 +174,11 @@ void main() {
   group('LootCardWidget widget', () {
     testWidgets('revealed=true shows front (has Stack)',
         (WidgetTester tester) async {
-      final card = _makeCard();
+      final card = makeCard();
       final originalOnError = FlutterError.onError;
       FlutterError.onError = ignoreOverflowErrors;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: LootCardWidget(card: card, revealed: true),
-          ),
-        ),
+        _l10nApp(Scaffold(body: LootCardWidget(card: card, revealed: true))),
       );
       FlutterError.onError = originalOnError;
       // Front has a Stack widget
@@ -180,15 +187,11 @@ void main() {
 
     testWidgets('revealed=false shows rear (ClipRRect)',
         (WidgetTester tester) async {
-      final card = _makeCard();
+      final card = makeCard();
       final originalOnError = FlutterError.onError;
       FlutterError.onError = ignoreOverflowErrors;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: LootCardWidget(card: card, revealed: false),
-          ),
-        ),
+        _l10nApp(Scaffold(body: LootCardWidget(card: card, revealed: false))),
       );
       FlutterError.onError = originalOnError;
       expect(find.byType(ClipRRect), findsOneWidget);

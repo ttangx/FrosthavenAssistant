@@ -12,28 +12,28 @@ void main() {
 
   group('SetAutoLevelAdjustCommand', () {
     test('should turn auto level adjust on', () {
-      final command = SetAutoLevelAdjustCommand(true);
+      final command = SetAutoLevelAdjustCommand(true, gameState: getIt<GameState>());
       command.execute();
       expect(getIt<GameState>().autoScenarioLevel.value, isTrue);
       checkSaveState();
     });
 
     test('should turn auto level adjust off', () {
-      SetAutoLevelAdjustCommand(true).execute();
-      final command = SetAutoLevelAdjustCommand(false);
+      SetAutoLevelAdjustCommand(true, gameState: getIt<GameState>()).execute();
+      final command = SetAutoLevelAdjustCommand(false, gameState: getIt<GameState>());
       command.execute();
       expect(getIt<GameState>().autoScenarioLevel.value, isFalse);
       checkSaveState();
     });
 
     test('describe should say "on" when enabled', () {
-      final command = SetAutoLevelAdjustCommand(true);
-      expect(command.describe(), 'turn automatic level updated on');
+      final command = SetAutoLevelAdjustCommand(true, gameState: getIt<GameState>());
+      expect(command.describe(), 'Turn automatic level update on');
     });
 
     test('describe should say "off" when disabled', () {
-      final command = SetAutoLevelAdjustCommand(false);
-      expect(command.describe(), 'turn automatic level updated off');
+      final command = SetAutoLevelAdjustCommand(false, gameState: getIt<GameState>());
+      expect(command.describe(), 'Turn automatic level update off');
     });
   });
 }

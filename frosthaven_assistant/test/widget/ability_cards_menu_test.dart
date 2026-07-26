@@ -1,10 +1,15 @@
+// ignore_for_file: avoid-late-keyword
+
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frosthaven_assistant/Layout/menus/ability_cards_menu.dart';
+import 'package:frosthaven_assistant/Layout/menus/AbilityCardsMenu/ability_card_list_item.dart';
+import 'package:frosthaven_assistant/Layout/menus/AbilityCardsMenu/ability_cards_menu.dart';
 import 'package:frosthaven_assistant/Layout/menus/remove_card_menu.dart';
 import 'package:frosthaven_assistant/Resource/commands/add_monster_command.dart';
 import 'package:frosthaven_assistant/Resource/commands/draw_ability_card_command.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
+import 'package:frosthaven_assistant/l10n/app_localizations.dart';
 import 'package:frosthaven_assistant/services/service_locator.dart';
 
 import '../command/test_helpers.dart';
@@ -21,7 +26,8 @@ void main() {
   // This ensures that our tests are independent and not affecting each other.
   setUp(() {
     getIt<GameState>().clearList();
-    AddMonsterCommand("Zealot", 1, false).execute();
+    AddMonsterCommand("Zealot", 1, false, gameState: getIt<GameState>())
+        .execute();
     DrawAbilityCardCommand("Zealot").execute();
     monster = getIt<GameState>().currentList.firstWhere((e) => e is Monster)
         as Monster;
@@ -33,6 +39,12 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('en')],
         home: Builder(
           builder: (context) {
             return ElevatedButton(
@@ -91,7 +103,7 @@ void main() {
       // Assert
       // After tapping '1', at least one card should be revealed.
       // We find the specific card by its key and check if it is revealed.
-      final item = tester.widget<Item>(find
+      final item = tester.widget<AbilityCardListItem>(find
           .byKey(Key(monsterAbilityState.discardPileTop.nr.toString()))
           .last
           .first);

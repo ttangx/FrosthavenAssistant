@@ -1,28 +1,24 @@
-import '../../../services/service_locator.dart';
 import '../../game_methods.dart';
 import '../../state/game_state.dart';
 import 'change_stat_command.dart';
+import '../command_l10n.dart';
 
 class ChangeXPCommand extends ChangeStatCommand {
-  ChangeXPCommand(super.change, super.figureId, super.ownerId);
+  ChangeXPCommand(super.change, super.figureId, super.ownerId,
+      {required super.gameState});
 
   @override
   void execute() {
-    CharacterState figure =
-        GameMethods.getFigure(ownerId, figureId)! as CharacterState;
+    final figure = GameMethods.getFigure(ownerId, figureId);
+    if (figure is! CharacterState) return;
     figure.setXp(stateAccess, figure.xp.value + change);
-  }
-
-  @override
-  void undo() {
-    getIt<GameState>().updateList.value++;
   }
 
   @override
   String describe() {
     if (change > 0) {
-      return "Increase $figureId's xp by $change";
+      return commandL10n.cmdIncreaseXp(figureId, change);
     }
-    return "Decrease $figureId's xp by ${change.abs()}";
+    return commandL10n.cmdDecreaseXp(figureId, change.abs());
   }
 }

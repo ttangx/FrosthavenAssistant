@@ -1,28 +1,26 @@
-import '../../services/service_locator.dart';
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class SetScenarioCommand extends Command {
-  final GameState _gameState = getIt<GameState>();
-  late final String _scenario;
-  late final bool _section;
+  final String _scenario;
+  final bool _section;
 
-  SetScenarioCommand(this._scenario, this._section);
+  SetScenarioCommand(
+    this._scenario,
+    this._section, {
+    required GameState gameState,
+  });
 
   @override
   void execute() {
-    MutableGameMethods.setScenario(stateAccess, _scenario, _section);
-  }
-
-  @override
-  void undo() {
-    _gameState.updateList.value++;
+    ScenarioMethods.setScenario(stateAccess, _scenario, _section);
   }
 
   @override
   String describe() {
     if (!_section) {
-      return "Set Scenario";
+      return commandL10n.cmdSetScenario;
     }
-    return "Add Section";
+    return commandL10n.cmdAddSection;
   }
 }

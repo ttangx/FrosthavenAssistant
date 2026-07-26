@@ -1,6 +1,9 @@
+// ignore_for_file: no-magic-number
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frosthaven_assistant/Resource/commands/add_monster_command.dart';
 import 'package:frosthaven_assistant/Resource/commands/set_level_command.dart';
+import 'package:frosthaven_assistant/Resource/settings.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
 import 'package:frosthaven_assistant/services/service_locator.dart';
 
@@ -70,7 +73,7 @@ void main() {
         final gs = getIt<GameState>();
         gs.action(SetLevelCommand(3, null));
         gs.action(SetLevelCommand(4, null));
-        final indexBefore = gs.commandIndex.value;
+        //final indexBefore = gs.commandIndex.value;
         gs.undo(); // undo SetLevel(4), now commandIndex = indexBefore - 1
         // Do a new action — should clear SetLevel(4) from the redo list
         gs.action(SetLevelCommand(5, null));
@@ -105,14 +108,111 @@ void main() {
       });
     });
 
+    group('getCurrent edge cases', () {
+      test('getCurrent throws when there is no valid command at current index',
+          () {
+        final gs = getIt<GameState>();
+        // Reset so commandIndex is -1 (no commands executed yet).
+        gs.commandIndex.value = -1;
+        gs.resetCommandHistory();
+        // getCurrent accesses _commands[commandIndex] — either a RangeError
+        // (negative index) or TypeError (null-check on a null entry). Either
+        // way it must throw an Error so callers know to guard the call site.
+        expect(() => gs.getCurrent(), throwsA(isA<Error>()));
+      });
+    });
+
+    group('redo after maxUndo eviction', () {
+      test('redo from the oldest valid position does not crash', () {
+        final gs = getIt<GameState>();
+        final maxUndo = gs.maxUndo;
+
+        // Execute maxUndo + 1 commands so the oldest save state is evicted.
+        for (int i = 0; i <= maxUndo; i++) {
+          gs.action(SetLevelCommand((i % 7) + 1, null));
+        }
+
+        // Undo all the way to the eviction boundary:
+        // only the last maxUndo states are guaranteed non-null.
+        for (int i = 0; i < maxUndo; i++) {
+          gs.undo();
+        }
+        // commandIndex is now at the boundary; gameSaveStates[commandIndex + 1]
+        // may be null (evicted). redo() must return early without crashing.
+        expect(() => gs.redo(), returnsNormally);
+
+        // Restore state for other tests.
+        gs.undo();
+      });
+    });
+
     group('add monster then undo', () {
       test('undo after adding a monster removes it from the list', () {
         final gs = getIt<GameState>();
         gs.clearList();
-        gs.action(AddMonsterCommand('Zealot', 1, false));
+        gs.action(AddMonsterCommand('Zealot', 1, false,
+            gameState: getIt<GameState>()));
         expect(gs.currentList.any((e) => e.id == 'Zealot'), isTrue);
         gs.undo();
         expect(gs.currentList.any((e) => e.id == 'Zealot'), isFalse);
+      });
+    });
+
+    group('undo with commandIndex beyond gameSaveStates (Sentry regression)', () {
+      // Regression test for:
+      // ArgumentError: RangeError (length): Invalid value: Not in inclusive range 0..1079: 1080
+      // ActionHandler.undo — crash when commandIndex >= gameSaveStates.length.
+      //
+      // Cause: in the server multiplayer path, Server.updateStateFromMessage sets
+      // commandIndex.value = message.index directly, then calls save().  After a
+      // resetState() (history cleared) a client that was ahead can send a message
+      // whose index ends up beyond the current gameSaveStates length after save().
+      // A subsequent "undo" message from any client then crashes at
+      // _gameSaveStates[commandIndex.value] with no upper-bound guard.
+      test('does not crash when commandIndex >= gameSaveStates.length', () {
+        final gs = getIt<GameState>();
+        final settings = getIt<Settings>();
+
+        // Build a small amount of history.
+        gs.action(SetLevelCommand(3, null));
+        gs.action(SetLevelCommand(4, null));
+
+        // Advance commandIndex past the end of gameSaveStates, simulating the
+        // server receiving a state message whose index was not matched by a save().
+        gs.commandIndex.value = gs.gameSaveStates.length; // one beyond valid range
+
+        // A client sends "undo" — the server calls undoState() → undo().
+        // This must not throw a RangeError.
+        settings.server.value = true;
+        expect(() => gs.undo(), returnsNormally);
+        settings.server.value = false;
+
+        // Restore a clean state for subsequent tests.
+        gs.commandIndex.value = -1;
+        gs.resetCommandHistory();
+      });
+    });
+
+    group('redo after connection reset in server mode', () {
+      // Regression test for: ArgumentError: RangeError (length): Invalid value:
+      // Valid value range is empty: -1 in ActionHandler.redo when a stale client
+      // sends "redo" after the server resets its command history on reconnect.
+      test('does not crash when commandIndex is -1 after connection reset', () {
+        final gs = getIt<GameState>();
+        final settings = getIt<Settings>();
+
+        // Build some history so gameSaveStates has an entry to retain.
+        gs.action(SetLevelCommand(3, null));
+
+        // Simulate the server-side connection-reset sequence:
+        // commandIndex → -1, command/description lists cleared, last save state kept.
+        gs.commandIndex.value = -1;
+        gs.resetCommandHistory();
+
+        // Stale client sends "redo" before it has re-synced with the server.
+        settings.server.value = true;
+        expect(() => gs.redo(), returnsNormally);
+        settings.server.value = false;
       });
     });
   });

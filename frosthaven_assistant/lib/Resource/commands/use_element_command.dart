@@ -1,18 +1,21 @@
 import '../enums.dart';
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class UseElementCommand extends Command {
-  late final Elements element;
+  final Elements element;
+  final GameState? _gameState;
 
-  UseElementCommand(this.element);
+  UseElementCommand(this.element, {GameState? gameState})
+      : _gameState = gameState;
 
   @override
   void execute() {
-    MutableGameMethods.useElement(stateAccess, element);
+    ElementMethods.useElement(stateAccess, element, gameState: _gameState);
   }
 
   @override
   String describe() {
-    return "Use Element ${element.name}";
+    return commandL10n.cmdUseElement(element.name);
   }
 }

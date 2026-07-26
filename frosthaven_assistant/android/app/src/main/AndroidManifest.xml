@@ -3,13 +3,19 @@
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- connectedDevice FGS type requires FOREGROUND_SERVICE_CONNECTED_DEVICE
+         plus at least one actual connection permission (CHANGE_WIFI_STATE for TCP) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <application
         android:label="X-haven Assistant"
-        android:name="${applicationName}"
+        android:name=".MainApplication"
         android:banner="@drawable/atv_banner_small"
         android:icon="@mipmap/launcher_icon">
         <activity
@@ -35,6 +41,10 @@
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" android:required="false" />
             </intent-filter>
         </activity>
+        <service
+            android:name=".ServerForegroundService"
+            android:foregroundServiceType="connectedDevice"
+            android:exported="false" />
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:frosthaven_assistant/Layout/components/menu_card.dart';
-import 'package:frosthaven_assistant/Resource/app_constants.dart';
+import 'package:frosthaven_assistant/Layout/widgets/menu_card.dart';
 import 'package:frosthaven_assistant/Layout/menus/save_character_menu.dart';
+import 'package:frosthaven_assistant/Resource/app_constants.dart';
+import 'package:frosthaven_assistant/l10n/app_localizations.dart';
 
 import '../../Model/character_class.dart';
 import '../../Resource/commands/remove_character_command.dart';
@@ -11,14 +12,21 @@ import '../../services/service_locator.dart';
 import './character_tile.dart';
 
 class RemoveCharacterMenu extends StatefulWidget {
-  const RemoveCharacterMenu({super.key});
+  const RemoveCharacterMenu({
+    super.key,
+    this.gameState,
+  });
+
+  final GameState? gameState;
 
   @override
   RemoveCharacterMenuState createState() => RemoveCharacterMenuState();
 }
 
 class RemoveCharacterMenuState extends State<RemoveCharacterMenu> {
-  final GameState _gameState = getIt<GameState>();
+  static const double _kMaxWidth = 400;
+
+  GameState get _gameState => widget.gameState ?? getIt<GameState>();
 
   @override
   initState() {
@@ -29,7 +37,7 @@ class RemoveCharacterMenuState extends State<RemoveCharacterMenu> {
   @override
   Widget build(BuildContext context) {
     List<Character> currentCharacters = [];
-    for (var data in _gameState.currentList) {
+    for (final data in _gameState.currentList) {
       if (data is Character) {
         currentCharacters.add(data);
       }
@@ -42,14 +50,15 @@ class RemoveCharacterMenuState extends State<RemoveCharacterMenu> {
             (character) => character.characterClass == characterClassToRemove);
 
         if (indexToRemove != -1) {
-          _gameState.action(
-              RemoveCharacterCommand([currentCharacters[indexToRemove]]));
+          _gameState.action(RemoveCharacterCommand(
+              [currentCharacters[indexToRemove]],
+              gameState: _gameState));
         }
       });
     }
 
     return MenuCard(
-        maxWidth: 400,
+        maxWidth: _kMaxWidth,
         child: Column(
           children: [
             const SizedBox(
@@ -61,15 +70,16 @@ class RemoveCharacterMenuState extends State<RemoveCharacterMenu> {
                 openDialog(context, SaveCharacterMenu());
               },
               child: Text(
-                "Load or Save Characters",
+                AppLocalizations.of(context)!.loadOrSaveCharacters,
                 style: kTitleStyle,
               ),
             ),
             ListTile(
-              title: const Text("Remove All", style: kTitleStyle),
+              title: Text(AppLocalizations.of(context)!.removeAll, style: kTitleStyle),
               onTap: () {
                 //todo: ask if wanna save
-                _gameState.action(RemoveCharacterCommand(currentCharacters));
+                _gameState.action(RemoveCharacterCommand(currentCharacters,
+                    gameState: _gameState));
                 Navigator.pop(context);
               },
             ),

@@ -1,17 +1,20 @@
-import '../../services/service_locator.dart';
 import '../game_methods.dart';
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class AddFactionCardCommand extends Command {
   final String characterId;
   final String cardId;
   final bool add;
-  AddFactionCardCommand(this.characterId, this.cardId, this.add);
+  final GameState _gameState;
+
+  AddFactionCardCommand(this.characterId, this.cardId, this.add,
+      {required GameState gameState})
+      : _gameState = gameState;
 
   @override
   void execute() {
-    ModifierDeck? deck =
-        GameMethods.getModifierDeck(characterId, getIt<GameState>());
+    ModifierDeck? deck = GameMethods.getModifierDeck(characterId, _gameState);
     if (add) {
       deck.addCard(stateAccess, cardId, CardType.add);
     } else {
@@ -22,7 +25,7 @@ class AddFactionCardCommand extends Command {
   @override
   String describe() {
     return add
-        ? "$characterId add faction card"
-        : "$characterId remove faction card";
+        ? commandL10n.cmdAddFactionCard(characterId)
+        : commandL10n.cmdRemoveFactionCard(characterId);
   }
 }

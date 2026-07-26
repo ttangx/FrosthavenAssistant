@@ -1,20 +1,31 @@
-import '../../services/service_locator.dart';
 import '../game_methods.dart';
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class ReturnRemovedAMDCardCommand extends Command {
   final int index;
   final String name;
-  final GameState _gameState = getIt<GameState>();
-  ReturnRemovedAMDCardCommand(this.index, this.name);
+  final bool toDrawPile;
+  final GameState _gameState;
+
+  ReturnRemovedAMDCardCommand({
+    required this.index,
+    required this.name,
+    this.toDrawPile = false,
+    required GameState gameState,
+  }) : _gameState = gameState;
   @override
   void execute() {
     final deck = GameMethods.getModifierDeck(name, _gameState);
-    deck.returnCardToDiscard(stateAccess, index);
+    if (toDrawPile) {
+      deck.returnCardToDrawPileFromRemoved(stateAccess, index);
+    } else {
+      deck.returnCardToDiscard(stateAccess, index);
+    }
   }
 
   @override
   String describe() {
-    return "Return removed amd card";
+    return commandL10n.cmdReturnRemovedAmdCard;
   }
 }

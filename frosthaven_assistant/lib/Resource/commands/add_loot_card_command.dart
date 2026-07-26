@@ -1,17 +1,19 @@
-import '../../services/service_locator.dart';
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class AddLootCardCommand extends Command {
-  AddLootCardCommand(this.resourceType);
+  AddLootCardCommand(this.resourceType, {required GameState gameState})
+      : _gameState = gameState;
   final String resourceType;
+  final GameState _gameState;
 
   @override
   void execute() {
-    getIt<GameState>().lootDeck.addExtraCard(stateAccess, resourceType);
+    _gameState.lootDeck.addExtraCard(stateAccess, resourceType);
   }
 
   @override
   String describe() {
-    return "Add $resourceType Loot Card";
+    return commandL10n.cmdAddLootCard(resourceType);
   }
 }

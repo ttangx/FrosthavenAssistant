@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frosthaven_assistant/Layout/menus/character_loot_menu.dart';
 import 'package:frosthaven_assistant/Resource/commands/add_character_command.dart';
@@ -7,6 +8,7 @@ import 'package:frosthaven_assistant/Resource/commands/set_campaign_command.dart
 import 'package:frosthaven_assistant/Resource/commands/set_loot_owner_command.dart';
 import 'package:frosthaven_assistant/Resource/commands/set_scenario_command.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
+import 'package:frosthaven_assistant/l10n/app_localizations.dart';
 import 'package:frosthaven_assistant/services/service_locator.dart';
 
 import '../../command/test_helpers.dart';
@@ -27,6 +29,12 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('en')],
         home: Builder(
           builder: (context) => ElevatedButton(
             onPressed: () {
@@ -46,8 +54,9 @@ void main() {
   }
 
   group('CharacterLootMenu', () {
-    testWidgets("renders character loot section with character name",
-        (WidgetTester tester) async {
+    testWidgets("renders character loot section with character name", (
+      WidgetTester tester,
+    ) async {
       await pumpMenu(tester);
       expect(find.textContaining("Blinkblade"), findsOneWidget);
     });
@@ -57,20 +66,27 @@ void main() {
       expect(find.text('Close'), findsOneWidget);
     });
 
-    testWidgets('tapping Close dismisses the dialog', (WidgetTester tester) async {
+    testWidgets('tapping Close dismisses the dialog', (
+      WidgetTester tester,
+    ) async {
       await pumpMenu(tester);
       await tester.tap(find.text('Close'));
       await tester.pumpAndSettle();
       expect(find.byType(CharacterLootMenu), findsNothing);
     });
 
-    testWidgets('renders loot with discard pile having owned cards',
-        (WidgetTester tester) async {
+    testWidgets('renders loot with discard pile having owned cards', (
+      WidgetTester tester,
+    ) async {
       // Set up a Frosthaven scenario with loot deck
       getIt<GameState>().clearList();
       AddCharacterCommand('Blinkblade', 'Frosthaven', null, 1).execute();
       SetCampaignCommand('Frosthaven').execute();
-      SetScenarioCommand('#0 Howling in the Snow', false).execute();
+      SetScenarioCommand(
+        '#0 Howling in the Snow',
+        false,
+        gameState: getIt<GameState>(),
+      ).execute();
 
       final gs = getIt<GameState>();
       final character =
@@ -78,12 +94,13 @@ void main() {
 
       // Draw and assign loot cards if deck has any
       if (gs.lootDeck.drawPileIsNotEmpty) {
-        DrawLootCardCommand().execute();
+        DrawLootCardCommand(gameState: getIt<GameState>()).execute();
         // SetLootOwnerCommand assigns ownership of discard pile cards
         if (gs.lootDeck.discardPileIsNotEmpty) {
-          SetLootOwnerCommand(character.id,
-                  gs.lootDeck.discardPileContents.toList().first)
-              .execute();
+          SetLootOwnerCommand(
+            character.id,
+            gs.lootDeck.discardPileContents.toList().first,
+          ).execute();
         }
       }
 

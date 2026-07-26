@@ -7,13 +7,21 @@ import 'dart:typed_data';
 class StateUpdateMessage {
   String indexString = "";
   String description = "";
+  String eventJson = '{"type":"none"}';
   String data = "";
   int index = 0;
 }
 
 abstract class GameServer {
 
-  final int serverVersion = 1302;
+  /// Wire-protocol version. Increment this ONLY when the message format itself
+  /// changes (e.g. envelope fields added/removed). Game-data additions (new
+  /// classes, campaigns) must NOT bump this number.
+  static const int protocolVersion = 1;
+
+  // Sockets rejected for version mismatch.  Checked in onDone so that
+  // "Client left." does not overwrite the rejection message.
+  final Set<Socket> _rejectedClients = {};
 
   ServerSocket? _serverSocket;
   ServerSocket? get serverSocket {
@@ -31,13 +39,6 @@ abstract class GameServer {
     _serverEnabled = value;
   }
 
-  String _leftOverMessage = "";
-  String get leftOverMessage{
-    return _leftOverMessage;
-  }
-  set leftOverMessage(String value){
-    _leftOverMessage = value;
-  }
 
   void resetState();
   void undoState();
@@ -58,21 +59,41 @@ abstract class GameServer {
   void sendInitResponse(Socket client);
 
 
-  StateUpdateMessage parseStateUpdateMessage(String message) {
-    List<String> messageParts1 = message.split("Description:");
-    String indexString =
-        messageParts1[0].substring("Index:".length);
-    List<String> messageParts2 =
-        messageParts1[1].split("GameState:");
-    String description = messageParts2[0];
-    String data = messageParts2[1];
-    StateUpdateMessage result =  StateUpdateMessage();
-    result.indexString = indexString;
-    result.index = int.parse(indexString);
-    result.description = description;
-    result.data = data;
-    return result;
+  /// Encodes a state message as a JSON envelope.
+  ///
+  /// [eventJson] must be a valid JSON string (e.g. `'{"type":"none"}'`).
+  static String encodeStateEnvelope({
+    required int index,
+    required String description,
+    required String eventJson,
+    required String state,
+  }) {
+    return jsonEncode({
+      'i': index,
+      'd': description,
+      'e': jsonDecode(eventJson),
+      's': state,
+    });
   }
+
+  /// Tries to decode [content] as a JSON envelope.
+  /// Returns `null` if it is not in the new format.
+  static StateUpdateMessage? tryDecodeStateEnvelope(String content) {
+    if (!content.startsWith('{')) return null;
+    try {
+      final map = jsonDecode(content) as Map<String, dynamic>;
+      final result = StateUpdateMessage();
+      result.index = map['i'] as int;
+      result.indexString = result.index.toString();
+      result.description = map['d'] as String;
+      result.eventJson = jsonEncode(map['e'] as Object);
+      result.data = map['s'] as String;
+      return result;
+    } catch (_) {
+      return null;
+    }
+  }
+
 
   Future<void> startServerInternal(String ip, int port) async {
     try {
@@ -117,8 +138,6 @@ abstract class GameServer {
       removeAllClientConnections();
     }
     serverEnabled = false;
-    leftOverMessage = "";
-
     resetState();
   }
 
@@ -129,32 +148,82 @@ abstract class GameServer {
   }
 
   void handleConnection(Socket client) {
-    client.setOption(SocketOption.tcpNoDelay, true);
+    try {
+      client.setOption(SocketOption.tcpNoDelay, true);
+    } on SocketException catch (e) {
+      // Client disconnected between accept() and handleConnection — socket is
+      // already invalid. Destroy it and skip setup.
+      log('Client disconnected before setup (errno 22): $e');
+      client.destroy();
+      return;
+    } on OSError catch (e) {
+      // Same as above but surfaced as OSError on iOS/macOS.
+      log('Client disconnected before setup (OSError): $e');
+      client.destroy();
+      return;
+    }
     client.encoding = utf8;
 
     logHandleConnection(client);
 
     addClientConnection(client);
 
+    // Per-connection leftover buffer — avoids the shared-field bug where
+    // messages from different clients could corrupt each other's partial frames.
+    String leftOver = "";
+
+    const String prefix = 'S3nD:';
+    const String suffix = '[EOM]';
+
     // listen for events from the client
     try {
       client.listen(
         // handle data from the client
-        (Uint8List data) async {
-          String message = utf8.decode(data);
-          message = leftOverMessage + message;
-          leftOverMessage = "";
-          processMessages(message, client);
+        (Uint8List data) {
+          String chunk;
+          try {
+            chunk = utf8.decode(data);
+          } on FormatException catch (e) {
+            log('Invalid UTF-8 from client: $e');
+            removeClientConnection(client);
+            return;
+          }
+          leftOver += chunk;
+          // Use indexOf-based framing: safe if the payload contains "S3nD:".
+          while (true) {
+            final int start = leftOver.indexOf(prefix);
+            if (start == -1) break;
+            final int contentStart = start + prefix.length;
+            final int end = leftOver.indexOf(suffix, contentStart);
+            if (end == -1) break;
+            final String content = leftOver.substring(contentStart, end);
+            leftOver = leftOver.substring(end + suffix.length);
+            processMessages(content, client);
+          }
         },
         // handle errors
         onError: (error) {
-          log('Client socket error: $error');
-          // Remove only this client, not the whole server. Previous logic called
-          // stopServer() which killed TCP for ALL clients when one iOS client
-          // disconnected abruptly (phone locked, connection reset, etc).
+          // errno 103 (ECONNABORTED): the OS killed this client's socket
+          // (app backgrounded, screen locked, network switch). Classify it so
+          // the log stays readable, but either way remove ONLY this client:
+          // earlier logic called stopServer(), which killed TCP for ALL clients
+          // when a single iOS client dropped (phone locked, connection reset).
+          final int? errno = error is SocketException
+              ? error.osError?.errorCode
+              : error is OSError
+                  ? error.errorCode
+                  : null;
+          if (errno == 103) {
+            log('Client aborted connection (errno 103): ${safeGetClientAddress(client)}');
+            setNetworkMessage('Client left.');
+          } else {
+            log('Client socket error: $error');
+            setNetworkMessage(error.toString());
+          }
+          // The framing buffer is now a per-connection local (leftOver), so it
+          // needs no reset here — it dies with this connection.
           try {
             removeClientConnection(client);
-            leftOverMessage = "";
           } catch (e) {
             log('Error removing client: $e');
           }
@@ -163,8 +232,12 @@ abstract class GameServer {
         onDone: () {
           if (serverEnabled) {
             removeClientConnection(client);
-            log('Client left');
-            setNetworkMessage('Client left.');
+            if (_rejectedClients.remove(client)) {
+              log('Rejected old-version client disconnected');
+            } else {
+              log('Client left');
+              setNetworkMessage('Client left.');
+            }
           }
         },
       );
@@ -174,44 +247,59 @@ abstract class GameServer {
     }
   }
 
-  void processMessages(String socketMessages, Socket client){
-    List<String> messages = socketMessages.split("S3nD:");
-          //handle
-          for (var message in messages) {
-            if (message.endsWith("[EOM]")) {
-              message = message.substring(0, message.length - "[EOM]".length);
-              if (message.startsWith("Index:")) {
-                handleIndexMessage(message, client);
-              } else if (message.startsWith("init")) {
-                handleInitMessage(message, client);
-              } else if (message.startsWith("undo")) {
-                handleUndoMessage();
-              } else if (message.startsWith("redo")) {
-                handleRedoMessage();
-              } else if (message.startsWith("pong")) {
-                handlePongMessage(client);
-              } else if (message.startsWith("ping")) {
-                handlePingMessage(client);
-              }
-            } else {
-              leftOverMessage = message;
-            }
-          }
+  /// Dispatches a single fully-decoded, unframed message content to the
+  /// appropriate handler.  Framing (S3nD:/[EOM] extraction) is done by
+  /// [handleConnection] before calling this method.
+  void processMessages(String message, Socket client){
+    if (message.startsWith("{")) {
+      handleIndexMessage(message, client);
+    } else if (message.startsWith("init")) {
+      handleInitMessage(message, client);
+    } else if (message.startsWith("undo")) {
+      handleUndoMessage();
+    } else if (message.startsWith("redo")) {
+      handleRedoMessage();
+    } else if (message.startsWith("pong")) {
+      handlePongMessage(client);
+    } else if (message.startsWith("ping")) {
+      handlePingMessage(client);
+    }
   }
 
   void handleIndexMessage(String message, Socket client){
-    StateUpdateMessage parsedMessage = parseStateUpdateMessage(message);
-    updateStateFromMessage(parsedMessage, client);
+    final StateUpdateMessage? parsed = tryDecodeStateEnvelope(message);
+    if (parsed == null) {
+      log('Received malformed state message from ${safeGetClientAddress(client)}, ignoring.');
+      return;
+    }
+    updateStateFromMessage(parsed, client);
   }
 
   void handleInitMessage(String message, Socket client){
-    List<String> initMessageParts = message.split("version:");
-    int version = int.parse(initMessageParts[1]);
-    if (version != serverVersion) {
-      //version mismatch
-      setNetworkMessage("Client version mismatch. Please update. Client $version Server $serverVersion");
+    // Old clients (≤v1.13.7) send "init version:NNNN" — give a friendly
+    // rejection rather than a confusing "malformed" error, then close the socket.
+    if (message.contains("version:") && !message.contains("protocolVersion:")) {
+      setNetworkMessage("Old client attempted to connect. Please update the app.");
+      sendToOnly("Error: Your app is outdated. Please update to connect.", client);
+      _rejectedClients.add(client);
+      removeClientConnection(client);
+      return;
+    }
+    List<String> initMessageParts = message.split("protocolVersion:");
+    if (initMessageParts.length < 2) {
+      sendToOnly("Error: malformed init message (missing protocolVersion field).", client);
+      return;
+    }
+    final int? version = int.tryParse(initMessageParts[1]);
+    if (version == null) {
+      sendToOnly("Error: malformed init message (non-integer protocolVersion).", client);
+      return;
+    }
+    if (version != protocolVersion) {
+      setNetworkMessage(
+          "Protocol version mismatch. Client $version, server $protocolVersion. Please update.");
       sendToOnly(
-          "Error: Server Version is $serverVersion. client version is $version. Please update your client.",
+          "Error: Protocol version mismatch. Client $version, server $protocolVersion. Please update.",
           client);
     } else {
       sendInitResponse(client);

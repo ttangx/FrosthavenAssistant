@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:frosthaven_assistant/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frosthaven_assistant/Layout/menus/remove_amd_card_menu.dart';
 import 'package:frosthaven_assistant/Resource/commands/draw_modifier_card_command.dart';
@@ -18,7 +20,7 @@ void main() {
   setUp(() {
     getIt<GameState>().clearList();
     // Draw a card to populate the discard pile
-    DrawModifierCardCommand(deckName).execute();
+    DrawModifierCardCommand(deckName, gameState: getIt<GameState>()).execute();
   });
 
   Future<void> pumpMenu(WidgetTester tester) async {
@@ -27,6 +29,12 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('en')],
         home: Builder(
           builder: (context) => ElevatedButton(
             onPressed: () {

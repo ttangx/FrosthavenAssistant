@@ -1,8 +1,15 @@
+// ignore_for_file: avoid-late-keyword
+
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frosthaven_assistant/Layout/menus/ability_cards_menu.dart';
+import 'package:frosthaven_assistant/Layout/menus/AbilityCardsMenu/ability_card_list_item.dart';
+import 'package:frosthaven_assistant/Layout/menus/AbilityCardsMenu/ability_cards_menu.dart';
+import 'package:frosthaven_assistant/Layout/MonsterAbilityCardWidget/monster_ability_card_front.dart';
 import 'package:frosthaven_assistant/Resource/commands/add_monster_command.dart';
+import 'package:frosthaven_assistant/Resource/commands/draw_ability_card_command.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
+import 'package:frosthaven_assistant/l10n/app_localizations.dart';
 import 'package:frosthaven_assistant/services/service_locator.dart';
 
 import '../../command/test_helpers.dart';
@@ -17,7 +24,8 @@ void main() {
 
   setUp(() {
     getIt<GameState>().clearList();
-    AddMonsterCommand('Zealot', 1, false).execute();
+    AddMonsterCommand('Zealot', 1, false, gameState: getIt<GameState>())
+        .execute();
     monster = getIt<GameState>().currentList.firstWhere((e) => e is Monster)
         as Monster;
     abilityState = getIt<GameState>().currentAbilityDecks.first;
@@ -29,6 +37,12 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('en')],
         home: Builder(
           builder: (context) => ElevatedButton(
             onPressed: () {
@@ -77,6 +91,78 @@ void main() {
       await tester.tap(find.text('Close'));
       await tester.pumpAndSettle();
       expect(find.byType(AbilityCardsMenu), findsNothing);
+    });
+  });
+
+  group('AbilityCardsMenu network sync', () {
+    testWidgets(
+        'menu reflects updated pile after loadFromData (network sync)',
+        (WidgetTester tester) async {
+      final originalOnError = FlutterError.onError;
+      addTearDown(() => FlutterError.onError = originalOnError);
+      FlutterError.onError = ignoreOverflowErrors;
+
+      final gameState = getIt<GameState>();
+
+      // Capture the initial state (no cards drawn yet)
+      final cleanState = gameState.toString();
+
+      await pumpMenu(tester);
+
+      // Initially the discard pile is empty — no revealed (front-face) cards
+      expect(
+        tester
+            .widgetList<AbilityCardListItem>(find.byType(AbilityCardListItem))
+            .where((w) => w.revealed)
+            .length,
+        0,
+        reason: 'Expected no revealed cards (empty discard pile) initially',
+      );
+
+      // Locally draw a card so the discard pile has 1 card
+      gameState.action(DrawAbilityCardCommand(monster.id));
+      await tester.pump();
+
+      // The menu should now show 1 revealed (discard) card
+      expect(
+        tester
+            .widgetList<AbilityCardListItem>(find.byType(AbilityCardListItem))
+            .where((w) => w.revealed)
+            .length,
+        1,
+        reason: 'Expected 1 revealed card after drawing',
+      );
+
+      // Simulate network sync: a remote device has "undone" the draw and sends
+      // the clean state. loadFromData currently replaces _currentAbilityDecks
+      // with new instances, leaving the widget's abilityState reference stale.
+      gameState.loadFromData(cleanState);
+      // Network sync also bumps commandIndex to trigger the VLB rebuild:
+      gameState.commandIndex.value++;
+      await tester.pump();
+
+      // After fix: abilityState is updated in-place → discard pile = 0 → no revealed cards
+      // Before fix (bug): abilityState stale → discard pile = 1 → still 1 revealed card
+      expect(
+        tester
+            .widgetList<AbilityCardListItem>(find.byType(AbilityCardListItem))
+            .where((w) => w.revealed)
+            .length,
+        0,
+        reason:
+            'Expected no revealed cards after network sync reset to clean state',
+      );
+
+      // The MonsterAbilityCardFront widgets come from revealed AbilityCardListItems
+      expect(find.byType(MonsterAbilityCardFront), findsNothing,
+          reason:
+              'Expected no front-face cards after network sync reset to clean state');
+
+      // Dismiss the dialog explicitly so ReorderableColumn and its overlay
+      // clean up while the widget tree is still active, preventing teardown-
+      // time "deactivated widget ancestor" errors on Linux CI.
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
     });
   });
 }

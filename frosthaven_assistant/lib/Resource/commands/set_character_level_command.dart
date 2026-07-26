@@ -1,18 +1,19 @@
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class SetCharacterLevelCommand extends Command {
-  late final int level;
-  late final String characterId;
+  final int level;
+  final String characterId;
 
   SetCharacterLevelCommand(this.level, this.characterId);
 
   @override
   void execute() {
-    MutableGameMethods.setCharacterLevel(stateAccess, level, characterId);
+    CharacterMethods.setCharacterLevel(stateAccess, level, characterId);
   }
 
   @override
   String describe() {
-    return "Set $characterId's Level";
+    return commandL10n.cmdSetCharacterLevel(characterId);
   }
 }

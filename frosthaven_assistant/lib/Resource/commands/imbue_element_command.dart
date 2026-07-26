@@ -1,19 +1,23 @@
 import '../enums.dart';
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class ImbueElementCommand extends Command {
   final Elements element;
   final bool half;
+  final GameState? _gameState;
 
-  ImbueElementCommand(this.element, this.half);
+  ImbueElementCommand(this.element, this.half, {GameState? gameState})
+      : _gameState = gameState;
 
   @override
   void execute() {
-    MutableGameMethods.imbueElement(stateAccess, element, half);
+    ElementMethods.imbueElement(stateAccess, element, half,
+        gameState: _gameState);
   }
 
   @override
   String describe() {
-    return "Imbue element ${element.name}";
+    return commandL10n.cmdImbueElement(element.name);
   }
 }

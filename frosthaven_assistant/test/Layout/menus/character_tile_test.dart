@@ -1,9 +1,12 @@
+// ignore_for_file: no-empty-block, avoid-late-keyword, avoid-returning-widgets, avoid-top-level-members-in-tests, prefer-match-file-name
+
 import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frosthaven_assistant/Layout/menus/character_tile.dart';
 import 'package:frosthaven_assistant/Model/character_class.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
+import 'package:frosthaven_assistant/services/translation_service.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
 
@@ -27,7 +30,7 @@ Widget buildTestWidget(Widget child) {
 CharacterClass getTestCharacter({String name = 'CORE', bool hidden = false}) {
   return CharacterClass(
     'CORE', //id
-    'CORE', // name
+    name, // name
     const [10, 20, 30], // healthByLevel
     'First', // edition
     Colors.blue, // color
@@ -46,6 +49,7 @@ void main() {
   setUp(() {
     mockGameState = MockGameState();
     getIt.registerSingleton<GameState>(mockGameState);
+    getIt.registerSingleton<TranslationService>(TranslationService());
   });
 
   tearDown(() {

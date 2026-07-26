@@ -1,22 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:frosthaven_assistant/Resource/app_constants.dart';
 import 'package:frosthaven_assistant/Resource/ui_utils.dart';
+import 'package:frosthaven_assistant/l10n/app_localizations.dart';
 
-import '../../Layout/components/modal_background.dart';
+import '../../Layout/widgets/modal_background.dart';
 import '../../Resource/settings.dart';
 import '../../services/service_locator.dart';
 
 class SaveModalMenu extends StatefulWidget {
   const SaveModalMenu(
-      {super.key, required this.saveName, required this.saveOnly});
+      {super.key, required this.saveName, required this.saveOnly, this.settings});
 
   final bool saveOnly;
   final String saveName;
+  final Settings? settings;
 
   @override
   SaveModalMenuState createState() => SaveModalMenuState();
 }
 
 class SaveModalMenuState extends State<SaveModalMenu> {
+  static const double _kBorderWidth = 2.0;
+  static const double _kMenuWidth = 240.0;
+  static const double _kTopSpacing = 2.0;
+  static const double _kButtonSpacing = 10.0;
+  static const double _kNameSpacing = 20.0;
+  static const double _kNameFieldWidth = 200.0;
+
+  late final Settings _settings;
   final TextEditingController nameController = TextEditingController();
   final FocusNode focusNode = FocusNode();
 
@@ -24,6 +35,7 @@ class SaveModalMenuState extends State<SaveModalMenu> {
 
   @override
   initState() {
+    _settings = widget.settings ?? getIt<Settings>();
     // at the beginning, all items are shown
     super.initState();
     _newSaveName = widget.saveName;
@@ -50,15 +62,13 @@ class SaveModalMenuState extends State<SaveModalMenu> {
   Widget build(BuildContext context) {
     double scale = getModalMenuScale(context);
 
-    Settings settings = getIt<Settings>();
-
     final ButtonStyle buttonStyle = OutlinedButton.styleFrom(
-      side: BorderSide(width: 2 * scale, color: Colors.blue),
+      side: BorderSide(width: _kBorderWidth * scale, color: Colors.blue),
     );
 
     return ModalBackground(
-        width: 240 * scale,
-        height: 160 * scale,
+        width: _kMenuWidth * scale,
+        height: kSaveModalHeight * scale,
         alignment: Alignment.center,
         child: Stack(children: [
           Column(
@@ -66,56 +76,59 @@ class SaveModalMenuState extends State<SaveModalMenu> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-                height: 2 * scale,
+                height: _kTopSpacing * scale,
               ),
               Row(
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  //todo: scale button sizes
                   children: [
                     if (!widget.saveOnly)
                       OutlinedButton(
                         style: buttonStyle,
                         onPressed: () {
-                          settings.loadSave(widget.saveName);
+                          _settings.loadSave(widget.saveName);
                           Navigator.pop(context);
                           Navigator.pop(context);
                         },
-                        child: Text("Load", style: getButtonTextStyle(scale)),
+                        child: Text(AppLocalizations.of(context)!.loadButton,
+                            style: getButtonTextStyle(scale)),
                       ),
                     SizedBox(
-                      width: 10 * scale,
+                      width: _kButtonSpacing * scale,
                     ),
                     OutlinedButton(
                       style: buttonStyle,
                       onPressed: () {
-                        settings.deleteSave(widget.saveName);
-                        settings.saveState(_newSaveName);
+                        _settings.deleteSave(widget.saveName);
+                        _settings.saveState(_newSaveName);
                         Navigator.pop(context);
                         Navigator.pop(context);
                       },
-                      child: Text("Save", style: getButtonTextStyle(scale)),
+                      child: Text(AppLocalizations.of(context)!.saveButton,
+                          style: getButtonTextStyle(scale)),
                     ),
                     SizedBox(
-                      width: 10 * scale,
+                      width: _kButtonSpacing * scale,
                     ),
                     if (!widget.saveOnly)
                       OutlinedButton(
                         style: buttonStyle,
                         onPressed: () {
-                          settings.deleteSave(widget.saveName);
+                          _settings.deleteSave(widget.saveName);
                           Navigator.pop(context);
                         },
-                        child: Text("Delete", style: getButtonTextStyle(scale)),
+                        child: Text(AppLocalizations.of(context)!.deleteButton,
+                            style: getButtonTextStyle(scale)),
                       )
                   ]),
               SizedBox(
-                height: 20 * scale,
+                height: _kNameSpacing * scale,
               ),
-              Text("Set save name:", style: getTitleTextStyle(scale)),
+              Text(AppLocalizations.of(context)!.setSaveName,
+                  style: getTitleTextStyle(scale)),
               SizedBox(
-                  width: 200,
+                  width: _kNameFieldWidth,
                   child: TextField(
                     controller: nameController,
                     focusNode: focusNode,

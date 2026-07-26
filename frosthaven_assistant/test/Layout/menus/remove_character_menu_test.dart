@@ -1,4 +1,8 @@
+// ignore_for_file: no-magic-number
+
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:frosthaven_assistant/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frosthaven_assistant/Layout/menus/character_tile.dart';
 import 'package:frosthaven_assistant/Layout/menus/remove_character_menu.dart';
@@ -25,6 +29,12 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('en')],
         home: Builder(
           builder: (context) => ElevatedButton(
             onPressed: () {
@@ -53,60 +63,63 @@ void main() {
       expect(find.text('Close'), findsOneWidget);
     });
 
-    testWidgets('renders the "Load or Save Characters" button',
-        (WidgetTester tester) async {
+    testWidgets('renders the "Load or Save Characters" button', (
+      WidgetTester tester,
+    ) async {
       await pumpMenu(tester);
       expect(find.text('Load or Save Characters'), findsOneWidget);
     });
 
-    testWidgets('lists all currently added characters',
-        (WidgetTester tester) async {
+    testWidgets('lists all currently added characters', (
+      WidgetTester tester,
+    ) async {
       await pumpMenu(tester);
       // Both characters should appear as tiles
       expect(find.text('Blinkblade'), findsOneWidget);
       expect(find.byType(CharacterTile), findsNWidgets(2));
     });
 
-    testWidgets('tapping "Remove All" removes all characters and closes dialog',
-        (WidgetTester tester) async {
-      await pumpMenu(tester);
+    testWidgets(
+      'tapping "Remove All" removes all characters and closes dialog',
+      (WidgetTester tester) async {
+        await pumpMenu(tester);
 
-      await tester.tap(find.text('Remove All'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Remove All'));
+        await tester.pumpAndSettle();
 
-      expect(find.byType(RemoveCharacterMenu), findsNothing);
-      final characters = getIt<GameState>()
-          .currentList
-          .whereType<Character>()
-          .toList();
-      expect(characters, isEmpty);
-    });
+        expect(find.byType(RemoveCharacterMenu), findsNothing);
+        final characters = getIt<GameState>().currentList
+            .whereType<Character>()
+            .toList();
+        expect(characters, isEmpty);
+      },
+    );
 
-    testWidgets('tapping a character tile removes only that character',
-        (WidgetTester tester) async {
+    testWidgets('tapping a character tile removes only that character', (
+      WidgetTester tester,
+    ) async {
       await pumpMenu(tester);
 
       await tester.tap(find.text('Blinkblade'));
       await tester.pumpAndSettle();
 
-      final characters = getIt<GameState>()
-          .currentList
+      final characters = getIt<GameState>().currentList
           .whereType<Character>()
           .toList();
       expect(characters.length, 1);
       expect(characters.first.characterClass.name, 'Hatchet');
     });
 
-    testWidgets('tapping "Close" dismisses the dialog without changes',
-        (WidgetTester tester) async {
+    testWidgets('tapping "Close" dismisses the dialog without changes', (
+      WidgetTester tester,
+    ) async {
       await pumpMenu(tester);
 
       await tester.tap(find.text('Close'));
       await tester.pumpAndSettle();
 
       expect(find.byType(RemoveCharacterMenu), findsNothing);
-      final characters = getIt<GameState>()
-          .currentList
+      final characters = getIt<GameState>().currentList
           .whereType<Character>()
           .toList();
       expect(characters.length, 2);

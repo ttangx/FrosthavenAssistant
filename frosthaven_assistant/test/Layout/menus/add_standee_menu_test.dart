@@ -1,10 +1,15 @@
+// ignore_for_file: avoid-late-keyword
+
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frosthaven_assistant/Layout/menus/add_standee_menu.dart';
+import 'package:frosthaven_assistant/Layout/widgets/standee_nr_button.dart';
 import 'package:frosthaven_assistant/Resource/commands/add_monster_command.dart';
 import 'package:frosthaven_assistant/Resource/commands/add_standee_command.dart';
 import 'package:frosthaven_assistant/Resource/enums.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
+import 'package:frosthaven_assistant/l10n/app_localizations.dart';
 import 'package:frosthaven_assistant/services/service_locator.dart';
 
 import '../../command/test_helpers.dart';
@@ -18,7 +23,8 @@ void main() {
 
   setUp(() {
     getIt<GameState>().clearList();
-    AddMonsterCommand("Zealot", 1, false).execute();
+    AddMonsterCommand("Zealot", 1, false, gameState: getIt<GameState>())
+        .execute();
     monster = getIt<GameState>().currentList.firstWhere((e) => e is Monster)
         as Monster;
   });
@@ -29,6 +35,12 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('en')],
         home: Builder(
           builder: (context) => ElevatedButton(
             onPressed: () {
@@ -56,8 +68,10 @@ void main() {
 
     testWidgets('renders standee number buttons', (WidgetTester tester) async {
       await pumpMenu(tester);
-      expect(find.text('1'), findsOneWidget);
-      expect(find.text('2'), findsOneWidget);
+      // StandeeNrButton renders each number twice (shadow + main text) so
+      // there are 2 Text widgets per standee number.
+      expect(find.text('1'), findsNWidgets(2));
+      expect(find.text('2'), findsNWidgets(2));
     });
 
     testWidgets('renders the "Summoned:" checkbox',
@@ -72,7 +86,10 @@ void main() {
       await pumpMenu(tester);
       expect(monster.monsterInstances.length, 0);
 
-      await tester.tap(find.text('1'));
+      // Use StandeeNrButton predicate to avoid ambiguity — each button renders
+      // the number twice (shadow + main text), so find.text('1') finds 2 widgets.
+      await tester.tap(
+          find.byWidgetPredicate((w) => w is StandeeNrButton && w.nr == 1));
       await tester.pumpAndSettle();
 
       final updated = getIt<GameState>()
@@ -84,14 +101,16 @@ void main() {
 
     testWidgets('tapping an already occupied standee number does nothing',
         (WidgetTester tester) async {
-      AddStandeeCommand(1, null, monster.id, MonsterType.normal, false)
+      AddStandeeCommand(1, null, monster.id, MonsterType.normal, false,
+              gameState: getIt<GameState>())
           .execute();
       monster = getIt<GameState>().currentList.firstWhere((e) => e is Monster)
           as Monster;
       await pumpMenu(tester);
       final countBefore = monster.monsterInstances.length;
 
-      await tester.tap(find.text('1'));
+      await tester.tap(
+          find.byWidgetPredicate((w) => w is StandeeNrButton && w.nr == 1));
       await tester.pumpAndSettle();
 
       expect(monster.monsterInstances.length, countBefore);
@@ -103,6 +122,24 @@ void main() {
       // Check the Checkbox value via the widget state
       final checkbox = tester.widget<Checkbox>(find.byType(Checkbox));
       expect(checkbox.value, false);
+    });
+
+    testWidgets(
+        'standee button becomes disabled reactively after standee is added',
+        (WidgetTester tester) async {
+      await pumpMenu(tester);
+      expect(monster.monsterInstances.length, 0);
+
+      // Add standee 1 reactively (after menu is open)
+      getIt<GameState>().action(AddStandeeCommand(
+          1, null, monster.id, MonsterType.normal, false,
+          gameState: getIt<GameState>()));
+      await tester.pump();
+
+      // StandeeNrButton for nr 1 should now be pressed = null (grey / disabled)
+      final btn = tester.widget<StandeeNrButton>(
+          find.byWidgetPredicate((w) => w is StandeeNrButton && w.nr == 1));
+      expect(btn.onPressed, isNull);
     });
   });
 }

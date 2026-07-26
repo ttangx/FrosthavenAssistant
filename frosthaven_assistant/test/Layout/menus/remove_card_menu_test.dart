@@ -1,7 +1,11 @@
+// ignore_for_file: avoid-late-keyword
+
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:frosthaven_assistant/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frosthaven_assistant/Layout/menus/remove_card_menu.dart';
-import 'package:frosthaven_assistant/Model/MonsterAbility.dart';
+import 'package:frosthaven_assistant/Model/monster_ability.dart';
 import 'package:frosthaven_assistant/Resource/commands/add_monster_command.dart';
 import 'package:frosthaven_assistant/Resource/commands/draw_ability_card_command.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
@@ -18,7 +22,8 @@ void main() {
 
   setUp(() {
     getIt<GameState>().clearList();
-    AddMonsterCommand("Zealot", 1, false).execute();
+    AddMonsterCommand("Zealot", 1, false, gameState: getIt<GameState>())
+        .execute();
     DrawAbilityCardCommand("Zealot").execute();
     abilityState = getIt<GameState>().currentAbilityDecks.first;
   });
@@ -30,6 +35,12 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('en')],
         home: Builder(
           builder: (context) => ElevatedButton(
             onPressed: () {
@@ -53,8 +64,7 @@ void main() {
       final card = abilityState.discardPileTop;
       await pumpMenu(tester, card);
 
-      expect(
-          find.textContaining('Remove ${card.title}'), findsOneWidget);
+      expect(find.textContaining('Remove ${card.title}'), findsOneWidget);
     });
 
     testWidgets(
@@ -87,8 +97,8 @@ void main() {
       expect(find.byType(RemoveCardMenu), findsNothing);
       // RemoveCardCommand also shuffles + redraws — verify the card is gone
       final allCards = [
-        ...abilityState.drawPileContents.toList(),
-        ...abilityState.discardPileContents.toList(),
+        ...abilityState.drawPileContents,
+        ...abilityState.discardPileContents,
       ];
       expect(allCards.any((c) => c.nr == card.nr), isFalse);
     });

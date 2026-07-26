@@ -1,8 +1,8 @@
 import 'package:collection/collection.dart';
 
-import '../../Layout/menus/ability_cards_menu.dart';
 import '../game_methods.dart';
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class ShuffleDrawnAbilityCardCommand extends Command {
   final String deck;
@@ -15,12 +15,11 @@ class ShuffleDrawnAbilityCardCommand extends Command {
     if (monster != null) {
       MonsterAbilityState? deck = GameMethods.getDeck(monster.type.deck);
       deck?.shuffleUnDrawn(stateAccess);
-      AbilityCardsMenuState.revealedList = [];
     }
   }
 
   @override
   String describe() {
-    return "Drawn ability deck shuffle";
+    return commandL10n.cmdDrawnAbilityShuffle;
   }
 }

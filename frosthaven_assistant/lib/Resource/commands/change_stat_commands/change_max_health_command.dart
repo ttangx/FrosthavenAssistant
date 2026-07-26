@@ -1,14 +1,16 @@
-import '../../../services/service_locator.dart';
 import '../../game_methods.dart';
 import '../../state/game_state.dart';
 import 'change_stat_command.dart';
+import '../command_l10n.dart';
 
 class ChangeMaxHealthCommand extends ChangeStatCommand {
-  ChangeMaxHealthCommand(super.change, super.figureId, super.ownerId);
+  ChangeMaxHealthCommand(super.change, super.figureId, super.ownerId,
+      {required super.gameState});
 
   @override
   void execute() {
-    FigureState figure = GameMethods.getFigure(ownerId, figureId)!;
+    final FigureState? figure = GameMethods.getFigure(ownerId, figureId);
+    if (figure == null) return;
 
     int newValue = figure.maxHealth.value + change;
     if (newValue <= 0) {
@@ -29,15 +31,10 @@ class ChangeMaxHealthCommand extends ChangeStatCommand {
   }
 
   @override
-  void undo() {
-    getIt<GameState>().updateList.value++;
-  }
-
-  @override
   String describe() {
     if (change > 0) {
-      return "Increase $ownerId's max health";
+      return commandL10n.cmdIncreaseMaxHealth(ownerId ?? '');
     }
-    return "Decrease $ownerId's max health";
+    return commandL10n.cmdDecreaseMaxHealth(ownerId ?? '');
   }
 }

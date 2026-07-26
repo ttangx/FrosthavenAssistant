@@ -1,32 +1,30 @@
-import '../../services/service_locator.dart';
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class AddMonsterCommand extends Command {
-  final GameState _gameState = getIt<GameState>();
   final String _name;
   final int? _level;
   final bool _isAlly;
-  late Monster monster;
+  Monster? monster;
 
-  AddMonsterCommand(this._name, this._level, this._isAlly) {
-    monster =
-        MutableGameMethods.createMonster(stateAccess, _name, _level, _isAlly)!;
+  AddMonsterCommand(
+    this._name,
+    this._level,
+    this._isAlly, {
+    required GameState gameState,
+  }) {
+    monster = MonsterMethods.createMonster(stateAccess, _name, _level, _isAlly);
   }
 
   @override
   void execute() {
-    MutableGameMethods.addToMainList(stateAccess, null, monster);
-
-    _gameState.updateList.value++;
-  }
-
-  @override
-  void undo() {
-    _gameState.updateList.value++;
+    final m = monster;
+    if (m == null) return;
+    RoundMethods.addToMainList(stateAccess, null, m);
   }
 
   @override
   String describe() {
-    return "Add ${monster.type.display}";
+    return commandL10n.cmdAddMonster(monster?.type.display ?? '');
   }
 }

@@ -8,6 +8,7 @@ import 'package:get_it/get_it.dart';
 import '../Resource/game_data.dart';
 import 'network/communication.dart';
 import 'network/network.dart';
+import 'translation_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -17,14 +18,12 @@ final loading = ValueNotifier<bool>(true);
 void setupGetIt() {
   getIt.registerLazySingleton<GameData>(() => GameData());
   getIt.registerLazySingleton<Settings>(() => Settings());
-  getIt.registerLazySingleton<GameState>(() => GameState());
+  getIt.registerLazySingleton<GameState>(() => GameState(
+        communication: getIt<Communication>(),
+      ));
   getIt.registerLazySingleton<Communication>(() => Communication());
   getIt.registerLazySingleton<Network>(() => Network());
   getIt.registerLazySingleton<Connection>(() => Connection());
   getIt.registerLazySingleton<Client>(() => Client());
-}
-
-void setupMoreGetIt(BuildContext context) {
-  getIt.allowReassignment = true;
-  getIt.registerLazySingleton<BuildContext>(() => context);
+  getIt.registerLazySingleton<TranslationService>(() => TranslationService());
 }

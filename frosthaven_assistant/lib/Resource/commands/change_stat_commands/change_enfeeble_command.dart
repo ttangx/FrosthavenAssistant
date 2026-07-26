@@ -1,25 +1,28 @@
-import '../../../services/service_locator.dart';
 import '../../game_methods.dart';
 import '../../state/game_state.dart';
 import 'change_stat_command.dart';
+import '../command_l10n.dart';
 
 class ChangeEnfeebleCommand extends ChangeStatCommand {
   ModifierDeck? deck;
   final String gfx;
-  ChangeEnfeebleCommand(super.change, this.gfx, super.figureId, super.ownerId);
-  ChangeEnfeebleCommand.deck(this.deck, this.gfx) : super(0, '', '');
+  ChangeEnfeebleCommand(super.change, this.gfx, super.figureId, super.ownerId,
+      {required super.gameState});
+  ChangeEnfeebleCommand.deck(this.deck, this.gfx,
+      {required GameState gameState})
+      : super(0, '', '', gameState: gameState);
 
   @override
   void execute() {
     if (deck == null) {
-      deck = getIt<GameState>().modifierDeck;
-      for (var item in getIt<GameState>().currentList) {
+      deck = gameState.modifierDeck;
+      for (final item in gameState.currentList) {
         if (item.id == ownerId) {
           if (item is Monster &&
               item.isAlly &&
-              (getIt<GameState>().allyDeckInOGGloom.value ||
+              (gameState.allyDeckInOGGloom.value ||
                   !GameMethods.isOgGloomEdition())) {
-            deck = getIt<GameState>().modifierDeckAllies;
+            deck = gameState.modifierDeckAllies;
           }
           if (item is Character) {
             deck = item.characterState.modifierDeck;
@@ -27,19 +30,14 @@ class ChangeEnfeebleCommand extends ChangeStatCommand {
         }
       }
     }
-    deck?.addRemovableValue(gfx, change);
-  }
-
-  @override
-  void undo() {
-    getIt<GameState>().updateList.value++;
+    deck?.addRemovableValue(stateAccess, gfx, change);
   }
 
   @override
   String describe() {
     if (change > 0) {
-      return "Add Enfeeble";
+      return commandL10n.cmdAddEnfeeble;
     }
-    return "Remove Enfeeble";
+    return commandL10n.cmdRemoveEnfeeble;
   }
 }

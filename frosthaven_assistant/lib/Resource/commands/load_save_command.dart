@@ -1,20 +1,22 @@
-import '../../services/service_locator.dart';
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class LoadSaveCommand extends Command {
   String saveName;
   String saveData;
-  LoadSaveCommand(this.saveName, this.saveData);
+  final GameState _gameState;
+
+  LoadSaveCommand(this.saveName, this.saveData, {required GameState gameState})
+      : _gameState = gameState;
 
   @override
   void execute() {
-    getIt<GameState>().loadFromData(saveData);
-    getIt<GameState>().save();
-    getIt<GameState>().updateForUndo.value++;
+    _gameState.loadFromData(saveData);
+    _gameState.save();
   }
 
   @override
   String describe() {
-    return "Load saved game: $saveName";
+    return commandL10n.cmdLoadGame(saveName);
   }
 }

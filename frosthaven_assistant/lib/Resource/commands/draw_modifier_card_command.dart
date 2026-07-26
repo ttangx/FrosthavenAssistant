@@ -1,24 +1,29 @@
-import '../../services/service_locator.dart';
+import '../game_event.dart';
 import '../game_methods.dart';
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class DrawModifierCardCommand extends Command {
   final String name;
-  final GameState _gameState = getIt<GameState>();
+  final GameState _gameState;
 
-  DrawModifierCardCommand(this.name);
+  DrawModifierCardCommand(this.name, {required GameState gameState})
+      : _gameState = gameState;
 
   @override
   void execute() {
-    final deck = GameMethods.getModifierDeck(name, getIt<GameState>());
+    final deck = GameMethods.getModifierDeck(name, _gameState);
     deck.draw(stateAccess);
   }
 
   @override
   String describe() {
     if (name.isNotEmpty) {
-      return "Draw $name modifier card";
+      return commandL10n.cmdDrawModifierCard(name);
     }
-    return "Draw monster modifier card";
+    return commandL10n.cmdDrawMonsterModifierCard;
   }
+
+  @override
+  GameEvent get event => ModifierCardDrawnEvent(name);
 }

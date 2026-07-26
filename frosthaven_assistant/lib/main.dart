@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -8,15 +9,48 @@ import 'package:frosthaven_assistant/Resource/settings.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
 import 'package:frosthaven_assistant/main_state.dart';
 import 'package:frosthaven_assistant/services/service_locator.dart';
-import 'package:show_fps/show_fps.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:window_size/window_size.dart';
 
 import 'Resource/game_data.dart';
 import 'Resource/theme_switcher.dart';
+import 'l10n/app_localizations.dart';
+import 'services/linux_font_loader.dart';
+import 'services/translation_service.dart';
+
+// SocketExceptions caused by normal TCP connection lifecycle events (client
+// disconnects, network changes, timeouts). These are handled gracefully in
+// the networking layer and should not consume the Sentry error quota.
+const _benignSocketErrno = <int>{
+  9,     // EBADF          – bad file descriptor (socket already closed)
+  32,    // EPIPE          – broken pipe (client disconnected mid-write)
+  54,    // ECONNRESET     – connection reset by peer (macOS/iOS)
+  60,    // ETIMEDOUT      – operation timed out (macOS/iOS)
+  64,    // EHOSTDOWN      – host is down (macOS/BSD)
+  103,   // ECONNABORTED   – software caused connection abort (Android/Linux)
+  104,   // ECONNRESET     – connection reset by peer (Linux/Android)
+  107,   // ENOTCONN       – transport endpoint not connected
+  110,   // ETIMEDOUT      – operation timed out (Linux)
+  113,   // EHOSTUNREACH   – no route to host
+  121,   // ERROR_SEM_TIMEOUT – semaphore timeout (Windows)
+  10053, // WSAECONNABORTED – connection aborted by local software (Windows)
+  10054, // WSAECONNRESET  – connection forcibly closed by remote host (Windows)
+};
+
+bool _isBenignNetworkError(Object error) {
+  if (error is OSError) {
+    return _benignSocketErrno.contains(error.errorCode);
+  }
+  if (error is SocketException) {
+    final errno = error.osError?.errorCode;
+    return errno != null && _benignSocketErrno.contains(errno);
+  }
+  return false;
+}
 
 const title = 'X-haven Assistant';
+String appVersion = '';
 
 void _enablePlatformOverrideForDesktop() {
   if (kDebugMode && !kIsWeb && (Platform.isWindows || Platform.isLinux)) {
@@ -24,9 +58,10 @@ void _enablePlatformOverrideForDesktop() {
   }
 }
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setupGetIt();
+  appVersion = (await PackageInfo.fromPlatform()).version;
 
   _enablePlatformOverrideForDesktop();
   //debugPrintRebuildDirtyWidgets = true;
@@ -37,71 +72,117 @@ void main() {
   const minScreenWidth = 400.0;
   const minScreenHeight = 600.0;
 
+  await loadLinuxFonts();
+
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    setWindowTitle(title);
-    if (!Platform.isMacOS) {
-      windowManager.setMinimumSize(const Size(minScreenWidth, minScreenHeight));
-    }
-    setWindowMinSize(const Size(minScreenWidth,
-        minScreenHeight)); //when updating flutter you may need to re-set these values in main.cpp
-    setWindowMaxSize(Size.infinite);
+    await windowManager.ensureInitialized();
+    windowManager.setTitle(title);
+    windowManager.setMinimumSize(const Size(minScreenWidth, minScreenHeight));
+    windowManager.setResizable(true);
   }
 
-  ErrorWidget.builder = ((e) {
-    if (!kDebugMode) {
-      //to not show the gray boxes, when there are exceptions
-      return Container();
-      //todo: save a log?
+  FlutterError.onError = (details) {
+    if (kReleaseMode) {
+      if (!_isBenignNetworkError(details.exception)) {
+        Sentry.captureException(details.exception, stackTrace: details.stack);
+      }
+    } else {
+      FlutterError.dumpErrorToConsole(details);
     }
-    //show the error in debug builds
+  };
 
+  PlatformDispatcher.instance.onError = (error, stack) {
+    if (kReleaseMode && !_isBenignNetworkError(error)) {
+      Sentry.captureException(error, stackTrace: stack);
+    }
+    return true;
+  };
+
+  ErrorWidget.builder = (e) {
+    if (kReleaseMode) {
+      Sentry.captureException(e.exception, stackTrace: e.stack);
+      return Container();
+    }
     return ErrorWidget(e);
-  });
+  };
 
-  runApp(ThemeSwitcherWidget(initialTheme: theme, child: const MyApp()));
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = const String.fromEnvironment('SENTRY_DSN');
+    },
+    appRunner: () =>
+        runApp(ThemeSwitcherWidget(initialTheme: theme, child: const MyApp())),
+  );
+}
+
+Locale _parseLocale(String code) {
+  final parts = code.split('_');
+  return parts.length == 2 ? Locale(parts[0], parts[1]) : Locale(parts[0]);
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
+  static Future<void> _initializeApp() async {
+    try {
+      await getIt<GameData>().loadData("assets/data/");
+      getIt<GameState>().load();
+      await getIt<Settings>().init();
+      await getIt<TranslationService>().load(getIt<Settings>().locale.value);
+      loading.value = false;
+    } catch (error, stack) {
+      Sentry.captureException(error, stackTrace: stack);
+      debugPrint('Init failed: $error');
+      loading.value = false;
+    }
+  }
 
   // This widget is the root of the application.
   @override
   Widget build(BuildContext context) {
     //debugInvertOversizedImages = true;
 
-    //call after keyboard
-    WakelockPlus.enable();
-
     try {
       //initialize game
       getIt<GameState>().init();
-      getIt<GameData>()
-          .loadData("assets/data/")
-          .then((value) => getIt<GameState>().load())
-          .then((value) => getIt<Settings>().init())
-          .then((value) => {loading.value = false});
-    } catch (error) {
+      unawaited(_initializeApp());
+    } catch (error, stack) {
+      Sentry.captureException(error, stackTrace: stack);
+      debugPrint('Init failed: $error');
       loading.value = false;
     }
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      debugShowMaterialGrid: false,
-      checkerboardOffscreenLayers: false,
-      showPerformanceOverlay: false,
-      title: title,
-      theme: ThemeSwitcher.of(context).themeData,
-      builder: (context, child) {
-        if (child == null) {
-          return const SizedBox.shrink();
-        }
-        return GlobalHotkeys(child: child);
-      },
-      home: ShowFPS(
-          alignment: Alignment.topRight,
-          visible: !kReleaseMode && false,
-          showChart: true,
-          child: const MyHomePage(title: title)),
+    return ValueListenableBuilder<String>(
+      valueListenable: getIt<Settings>().locale,
+      builder: (context, locale, _) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        debugShowMaterialGrid: false,
+        checkerboardOffscreenLayers: false,
+        showPerformanceOverlay: false,
+        title: title,
+        theme: ThemeSwitcher.of(context).themeData,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: const [
+          Locale('en'),
+          Locale('de'),
+          Locale('fr'),
+          Locale('es'),
+          Locale('pl'),
+          Locale('ko'),
+          Locale('ru'),
+          Locale('zh'),
+          Locale('zh', 'Hant'),
+          Locale('th'),
+        ],
+        locale: _parseLocale(locale),
+        builder: (context, child) {
+          if (child == null) {
+            return const SizedBox.shrink();
+          }
+          return ExcludeSemantics(child: GlobalHotkeys(child: child));
+        },
+        home: const MyHomePage(title: title),
+      ),
     );
   }
 }

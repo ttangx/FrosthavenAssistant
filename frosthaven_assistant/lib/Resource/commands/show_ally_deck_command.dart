@@ -1,15 +1,16 @@
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class ShowAllyDeckCommand extends Command {
   ShowAllyDeckCommand();
 
   @override
   void execute() {
-    MutableGameMethods.showAllyDeck(stateAccess);
+    MonsterMethods.showAllyDeck(stateAccess);
   }
 
   @override
   String describe() {
-    return "Show Ally Deck";
+    return commandL10n.cmdShowAllyDeck;
   }
 }

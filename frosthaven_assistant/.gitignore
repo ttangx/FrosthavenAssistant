@@ -1,3 +1,6 @@
+# Local secrets (never commit)
+dart_defines.json
+
 # Miscellaneous
 *.class
 *.log
@@ -30,6 +33,12 @@
 .pub-cache/
 .pub/
 /build/
+
+#ai tools
+.claude/
+
+#logging tools
+.sentry-native/
 
 # Web related
 

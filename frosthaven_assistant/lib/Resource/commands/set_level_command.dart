@@ -1,21 +1,22 @@
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class SetLevelCommand extends Command {
-  late final int level;
-  late final String? monsterId;
+  final int level;
+  final String? monsterId;
 
   SetLevelCommand(this.level, this.monsterId);
 
   @override
   void execute() {
-    MutableGameMethods.setLevel(stateAccess, level, monsterId);
+    ScenarioMethods.setLevel(stateAccess, level, monsterId);
   }
 
   @override
   String describe() {
     if (monsterId != null) {
-      return "Set $monsterId's level";
+      return commandL10n.cmdSetMonsterLevel(monsterId!);
     }
-    return "Set Level";
+    return commandL10n.cmdSetLevel;
   }
 }

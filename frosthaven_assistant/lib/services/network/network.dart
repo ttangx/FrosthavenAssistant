@@ -3,13 +3,16 @@ import 'package:frosthaven_assistant/services/network/server.dart';
 
 import 'network_info.dart';
 
-enum ClientState { connected, disconnected, connecting }
+enum ClientState { connected, disconnected, connecting } // ignore: prefer-match-file-name, file contains network state and enum together
 
 class Network {
-  final Server server = Server();
+  final Server server;
   final NetworkInformation networkInfo = NetworkInformation();
   final networkMessage = ValueNotifier<String>("");
+  final networkMessageIsError = ValueNotifier<bool>(false);
 
   bool appInBackground = false;
   bool clientDisconnectedWhileInBackground = false;
+
+  Network({Server? server}) : server = server ?? Server();
 }

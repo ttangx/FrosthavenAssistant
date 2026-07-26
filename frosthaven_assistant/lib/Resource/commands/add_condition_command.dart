@@ -1,13 +1,18 @@
-import '../../services/service_locator.dart';
 import '../enums.dart';
 import '../game_methods.dart';
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class AddConditionCommand extends Command {
   final Condition condition;
   final String? ownerId;
   final String figureId;
-  AddConditionCommand(this.condition, this.figureId, this.ownerId);
+  final GameState _gameState;
+
+  AddConditionCommand(this.condition, this.figureId, this.ownerId,
+      {required GameState gameState})
+      : _gameState = gameState;
+
   @override
   void execute() {
     FigureState? figure = GameMethods.getFigure(ownerId, figureId);
@@ -29,25 +34,20 @@ class AddConditionCommand extends Command {
       }
 
       //only added this turn if is current or done
-      for (var item in getIt<GameState>().currentList) {
+      for (final item in _gameState.currentList) {
         if (item.id == ownerId) {
           if (item.turnState.value != TurnsState.notDone &&
-              getIt<GameState>().roundState.value == RoundState.playTurns) {
+              _gameState.roundState.value == RoundState.playTurns) {
             figure.addToConditionsThisTurn(stateAccess, condition);
           }
         }
       }
-      getIt<GameState>().updateList.value++;
+      _gameState.updateList.notify();
     }
   }
 
   @override
-  void undo() {
-    getIt<GameState>().updateList.value++;
-  }
-
-  @override
   String describe() {
-    return "Add condition: ${condition.getName()}";
+    return commandL10n.cmdAddCondition(condition.getName());
   }
 }

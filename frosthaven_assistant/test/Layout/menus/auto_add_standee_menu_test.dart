@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frosthaven_assistant/Layout/menus/auto_add_standee_menu.dart';
+import 'package:frosthaven_assistant/Layout/menus/AutoAddStandeeMenu/auto_add_standee_menu.dart';
+import 'package:frosthaven_assistant/l10n/app_localizations.dart';
 import 'package:frosthaven_assistant/Model/room.dart';
 import 'package:frosthaven_assistant/Resource/commands/add_monster_command.dart';
 import 'package:frosthaven_assistant/Resource/commands/add_standee_command.dart';
@@ -17,7 +19,8 @@ void main() {
 
   setUp(() {
     getIt<GameState>().clearList();
-    AddMonsterCommand('Zealot', 1, false).execute();
+    AddMonsterCommand('Zealot', 1, false, gameState: getIt<GameState>())
+        .execute();
   });
 
   Future<void> pumpMenu(WidgetTester tester) async {
@@ -30,6 +33,12 @@ void main() {
     ];
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('en')],
         home: Builder(
           builder: (context) => ElevatedButton(
             onPressed: () {
@@ -55,7 +64,8 @@ void main() {
       expect(find.textContaining('Zealot'), findsAtLeast(1));
     });
 
-    testWidgets('renders numbered standee buttons', (WidgetTester tester) async {
+    testWidgets('renders numbered standee buttons',
+        (WidgetTester tester) async {
       await pumpMenu(tester);
       // Standee buttons 1 through some number should be visible
       expect(find.text('1'), findsAtLeast(1));
@@ -74,8 +84,8 @@ void main() {
     testWidgets('tapping standee button 1 adds a standee to the monster',
         (WidgetTester tester) async {
       final gameState = getIt<GameState>();
-      final monster = gameState.currentList
-          .firstWhere((e) => e is Monster) as Monster;
+      final monster =
+          gameState.currentList.firstWhere((e) => e is Monster) as Monster;
       final instancesBefore = monster.monsterInstances.length;
 
       await pumpMenu(tester);
@@ -121,8 +131,9 @@ void main() {
         (WidgetTester tester) async {
       final gameState = getIt<GameState>();
       // Add standee 1 so it's already out
-      gameState.action(
-          AddStandeeCommand(1, null, 'Zealot', MonsterType.normal, false));
+      gameState.action(AddStandeeCommand(
+          1, null, 'Zealot', MonsterType.normal, false,
+          gameState: getIt<GameState>()));
 
       await pumpMenu(tester);
       // Button '1' should still render (greyed out, but visible)
@@ -153,7 +164,9 @@ void main() {
   group('AutoAddStandeeMenu large standee count', () {
     setUp(() {
       getIt<GameState>().clearList();
-      AddMonsterCommand('Rat Monstrosity', 1, false).execute();
+      AddMonsterCommand('Rat Monstrosity', 1, false,
+              gameState: getIt<GameState>())
+          .execute();
     });
 
     Future<void> pumpLargeMenu(WidgetTester tester) async {
@@ -165,6 +178,12 @@ void main() {
       ];
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en')],
           home: Builder(
             builder: (context) => ElevatedButton(
               onPressed: () {
@@ -184,7 +203,8 @@ void main() {
       FlutterError.onError = originalOnError;
     }
 
-    testWidgets('monster with 10 standees renders buttons through 10 and pluralizes name',
+    testWidgets(
+        'monster with 10 standees renders buttons through 10 and pluralizes name',
         (WidgetTester tester) async {
       await pumpLargeMenu(tester);
       // Rat Monstrosity ends with 'y' → _pluralize → 'Monstrosities'
@@ -198,8 +218,11 @@ void main() {
   group('AutoAddStandeeMenu two-monster progression', () {
     setUp(() {
       getIt<GameState>().clearList();
-      AddMonsterCommand('Zealot', 1, false).execute();
-      AddMonsterCommand('Vermling Raider', 1, false).execute();
+      AddMonsterCommand('Zealot', 1, false, gameState: getIt<GameState>())
+          .execute();
+      AddMonsterCommand('Vermling Raider', 1, false,
+              gameState: getIt<GameState>())
+          .execute();
     });
 
     testWidgets('while-loop skips zero-standee monster to next',
@@ -214,6 +237,12 @@ void main() {
       ];
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en')],
           home: Builder(
             builder: (context) => ElevatedButton(
               onPressed: () {
@@ -246,6 +275,12 @@ void main() {
       ];
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en')],
           home: Builder(
             builder: (context) => ElevatedButton(
               onPressed: () {
@@ -278,6 +313,91 @@ void main() {
     });
   });
 
+  group('AutoAddStandeeMenu Navigator.pop safety', () {
+    // Regression test for Sentry crash:
+    //   StateError: Bad state: No element
+    //   #0 Iterable.lastWhere (dart:core/iterable.dart:753)
+    //   #1 NavigatorState.pop
+    //   #2 AddStandeeMenuState.closeOrNext.<fn>
+    //
+    // Root cause: closeOrNext() was called multiple times in the same frame
+    // because the ValueListenableBuilder builder re-runs on every parent
+    // rebuild (commandIndex change + setState in _handleStandeePress both
+    // trigger builds). Each build scheduled Navigator.pop via
+    // addPostFrameCallback, so two pops fired for one action. The second pop
+    // found no matching route (the first had already dismissed the dialog) and
+    // crashed. Fix: _scheduleClose() guards with a _closing flag (only one pop
+    // ever queued) and a mounted check in the callback.
+    testWidgets(
+        'adding last standee closes dialog exactly once without Navigator crash',
+        (tester) async {
+      // Use a custom error handler that:
+      //  - Suppresses FlutterErrors (e.g. "No Material widget", layout overflow)
+      //    which are expected in the test environment for this dialog.
+      //  - Fails the test on StateError so the double-Navigator.pop crash
+      //    ("Bad state: No element") is caught as a real test failure.
+      //
+      // Without the fix, two Navigator.pop calls are scheduled per user action
+      // (commandIndex change + setState both trigger the ValueListenableBuilder
+      // builder). The second pop throws StateError: Bad state: No element when
+      // lastWhere finds no matching route on the navigator history.
+      StateError? stateError;
+      final originalOnError = FlutterError.onError;
+      addTearDown(() => FlutterError.onError = originalOnError);
+      FlutterError.onError = (FlutterErrorDetails details) {
+        final exception = details.exception;
+        if (exception is StateError) {
+          stateError = exception;
+        }
+        // FlutterErrors (No Material ancestor, overflow) are environmental
+        // test artefacts — suppress them so they don't mask the real check.
+      };
+
+      final monsterData = [
+        const RoomMonsterData('Zealot', [1, 0, 0], [0, 0, 0]),
+      ];
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en')],
+          home: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) =>
+                      AutoAddStandeeMenu(monsterData: monsterData),
+                );
+              },
+              child: const Text('Open'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      final button1 = find.text('1');
+      if (button1.evaluate().isNotEmpty) {
+        await tester.tap(button1.first, warnIfMissed: false);
+        // Pump through all post-frame callbacks. Before the fix, a StateError
+        // was thrown here because two Navigator.pop calls had been queued.
+        await tester.pump();
+        await tester.pumpAndSettle();
+      }
+
+      FlutterError.onError = originalOnError;
+      expect(stateError, isNull,
+          reason:
+              'StateError thrown during Navigator.pop — double-pop occurred: '
+              '$stateError');
+    });
+  });
+
   group('AutoAddStandeeMenu elite standees', () {
     Future<void> pumpEliteMenu(WidgetTester tester) async {
       final originalOnError = FlutterError.onError;
@@ -289,6 +409,12 @@ void main() {
       ];
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en')],
           home: Builder(
             builder: (context) => ElevatedButton(
               onPressed: () {

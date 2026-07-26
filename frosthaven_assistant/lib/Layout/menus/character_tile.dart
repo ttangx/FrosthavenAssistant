@@ -5,19 +5,20 @@ import '../../Resource/app_constants.dart';
 import '../../Resource/game_methods.dart';
 import '../../Resource/state/game_state.dart';
 import '../../services/service_locator.dart';
+import '../../services/translation_service.dart';
 
 class CharacterTile extends StatelessWidget {
-  CharacterTile(
+  const CharacterTile(
       {super.key,
       required this.character,
       required this.onSelect,
-      this.disabled = false});
+      this.disabled = false,
+      this.gameState});
 
   final CharacterClass character;
   final void Function(CharacterClass) onSelect;
   final bool disabled;
-  final GameState _gameState = getIt<GameState>();
-
+  final GameState? gameState;
   void _handleAddCharacter() {
     if (!disabled) {
       onSelect(character);
@@ -26,7 +27,9 @@ class CharacterTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool characterUnlocked = _gameState.unlockedClasses.contains(character.id);
+    final gameState = this.gameState ?? getIt<GameState>();
+    bool characterUnlocked =
+        gameState.unlockedClasses.contains(character.id);
 
     return ListTile(
       leading: Image.asset(
@@ -42,11 +45,11 @@ class CharacterTile extends StatelessWidget {
         filterQuality: FilterQuality.medium,
       ),
       title: Text(
-          character.hidden && !characterUnlocked ? "???" : character.name,
+          character.hidden && !characterUnlocked ? "???" : getIt<TranslationService>().t(character.name),
           style: TextStyle(
-              fontSize: kFontSizeTitle, color: disabled ? Colors.grey : Colors.black)),
-      trailing: Text("(${character.edition})",
-          style: kSubtitleStyle),
+              fontSize: kFontSizeTitle,
+              color: disabled ? Colors.grey : Colors.black)),
+      trailing: Text("(${character.edition})", style: kSubtitleStyle),
       onTap: _handleAddCharacter,
     );
   }

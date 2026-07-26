@@ -1,33 +1,30 @@
-import '../../services/service_locator.dart';
 import '../game_methods.dart';
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class RemoveCharacterCommand extends Command {
-  final GameState _gameState = getIt<GameState>();
   final List<Character> names;
 
-  RemoveCharacterCommand(this.names);
+  RemoveCharacterCommand(this.names, {required GameState gameState});
 
   @override
   void execute() {
-    MutableGameMethods.removeCharacters(stateAccess, names);
+    CharacterMethods.removeCharacters(stateAccess, names);
 
     if (names.length != 1 ||
         !GameMethods.isObjectiveOrEscort(names.first.characterClass)) {
-      MutableGameMethods.applyDifficulty(stateAccess);
+      ScenarioMethods.applyDifficulty(stateAccess);
     }
-  }
-
-  @override
-  void undo() {
-    _gameState.updateList.value++;
   }
 
   @override
   String describe() {
     if (names.length > 1) {
-      return "Remove all characters";
+      return commandL10n.cmdRemoveAllCharacters;
     }
-    return "Remove ${names[0].id}";
+    if(names.isNotEmpty) {
+      return commandL10n.cmdRemoveCharacter(names.first.id);
+    }
+    return commandL10n.cmdRemoveNoCharacters;
   }
 }

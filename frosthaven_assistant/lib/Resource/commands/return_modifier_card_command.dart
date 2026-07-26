@@ -1,4 +1,5 @@
 import '../state/game_state.dart';
+import 'command_l10n.dart';
 
 class ReturnModifierCardCommand extends Command {
   final String name;
@@ -7,11 +8,11 @@ class ReturnModifierCardCommand extends Command {
 
   @override
   void execute() {
-    MutableGameMethods.returnModifierCard(stateAccess, name);
+    DeckMethods.returnModifierCard(stateAccess, name);
   }
 
   @override
   String describe() {
-    return "Return modifier card to top";
+    return commandL10n.cmdReturnModifierCard;
   }
 }
