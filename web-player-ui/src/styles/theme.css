@@ -89,6 +89,97 @@ body {
   width: 100%;
 }
 
+.pull-refresh {
+  --pull-offset: 0px;
+  --pull-progress: 0;
+  align-items: center;
+  background:
+    radial-gradient(circle at 22% 20%, rgba(197, 228, 237, 0.16), transparent 42%),
+    linear-gradient(160deg, rgba(34, 51, 69, 0.98), rgba(17, 28, 38, 0.98));
+  border: 1px solid rgba(126, 201, 219, 0.45);
+  box-shadow:
+    0 7px 22px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 calc(8px + var(--pull-progress) * 10px) rgba(91, 189, 213, 0.2);
+  clip-path: polygon(0 7px, 7px 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 7px 100%, 0 calc(100% - 7px));
+  color: var(--color-ice-light);
+  display: flex;
+  font-family: var(--font-condensed);
+  font-size: 0.76rem;
+  font-weight: 700;
+  gap: 0.45rem;
+  left: 50%;
+  letter-spacing: 0.08em;
+  opacity: 0;
+  padding: 0.36rem 0.75rem 0.4rem 0.42rem;
+  pointer-events: none;
+  position: fixed;
+  text-transform: uppercase;
+  top: 0.45rem;
+  transform: translate(-50%, calc(-1.8rem + var(--pull-offset)));
+  transition:
+    transform 220ms cubic-bezier(0.2, 0, 0, 1),
+    opacity 140ms ease-out,
+    visibility 0s linear 220ms;
+  visibility: hidden;
+  white-space: nowrap;
+  z-index: 1000;
+}
+
+.pull-refresh--visible {
+  opacity: calc(0.4 + var(--pull-progress) * 0.6);
+  transition-delay: 0s;
+  visibility: visible;
+}
+
+.pull-refresh--ready {
+  border-color: rgba(201, 169, 97, 0.72);
+  color: #f2d58c;
+}
+
+.pull-refresh__sigil {
+  align-items: center;
+  background: rgba(126, 201, 219, 0.1);
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  display: inline-flex;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  height: 1.55rem;
+  justify-content: center;
+  line-height: 1;
+  opacity: 0.9;
+  transform: rotate(calc(var(--pull-progress) * 180deg));
+  transition:
+    transform 160ms cubic-bezier(0.2, 0, 0, 1),
+    background-color 160ms ease-out;
+  width: 1.55rem;
+}
+
+.pull-refresh--ready .pull-refresh__sigil {
+  background: rgba(201, 169, 97, 0.14);
+}
+
+.pull-refresh--refreshing .pull-refresh__sigil {
+  animation: pull-refresh-spin 700ms linear infinite;
+}
+
+@keyframes pull-refresh-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pull-refresh,
+  .pull-refresh__sigil {
+    animation: none;
+    transition: none;
+  }
+
+  .pull-refresh--refreshing .pull-refresh__sigil {
+    animation: none;
+  }
+}
+
 /* ═══════════════════════════════════════════
    CARD — dark panel with subtle glow border
    ═══════════════════════════════════════════ */

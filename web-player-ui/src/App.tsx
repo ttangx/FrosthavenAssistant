@@ -8,6 +8,7 @@ import CharacterSelection from './components/CharacterSelection';
 import CharacterSheet from './components/CharacterSheet';
 import ConnectionStatus from './components/ConnectionStatus';
 import ErrorBoundary from './components/ErrorBoundary';
+import PullToRefresh from './components/PullToRefresh';
 
 function App() {
   // Default to same origin (when served by Dart server) or fallback to known server
@@ -112,6 +113,7 @@ function App() {
 
   return (
     <ErrorBoundary>
+      <PullToRefresh />
       {selectedCharacter && (
         <img
           src={getClassPortrait(selectedCharacter.className)}
