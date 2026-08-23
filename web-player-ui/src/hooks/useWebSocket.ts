@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameState, ServerStateMessage } from '../types';
 import { parseServerGameState } from '../utils/serverProtocol';
+import { parseStateMessage } from '../utils/stateMessage';
 
 interface UseWebSocketOptions {
   url: string;
@@ -14,8 +15,6 @@ interface UseWebSocketReturn {
   send: (message: any) => void;
 }
 
-const MESSAGE_REGEX = /Index:(-?\d+)Description:(.*?)GameState:(.*)$/s;
-const MISMATCH_PREFIX = 'Mismatch:';
 const MAX_RECONNECT_ATTEMPTS = 12;
 const BASE_RECONNECT_DELAY = 500;
 const MAX_RECONNECT_DELAY = 30000;
@@ -118,21 +117,21 @@ export function useWebSocket({
         }
 
         const data = String(event.data);
-        if (data.startsWith(MISMATCH_PREFIX)) {
+        const stateMessage = parseStateMessage(data);
+        if (stateMessage?.mismatch) {
           onMismatchRef.current(data);
-          return;
         }
 
-        const match = data.match(MESSAGE_REGEX);
-        if (match) {
-          const stateJson = match[3];
-          if (!stateJson) return;
+        if (stateMessage) {
+          if (!stateMessage.stateJson) return;
           try {
-            const index = parseInt(match[1], 10);
-            const description = match[2];
-            const rawState = JSON.parse(stateJson);
+            const rawState = JSON.parse(stateMessage.stateJson);
             const gameState: GameState = parseServerGameState(rawState);
-            onStateUpdateRef.current({ index, description, gameState });
+            onStateUpdateRef.current({
+              index: stateMessage.index,
+              description: stateMessage.description,
+              gameState,
+            });
           } catch (parseError) {
             onErrorRef.current(`Failed to parse server message: ${parseError}`);
           }
