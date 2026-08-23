@@ -77,6 +77,29 @@ class AppLocalizationsPl extends AppLocalizations {
   String get actionLogRollbackConfirm => 'Cofnij';
 
   @override
+  String get actionLogActionsTab => 'Akcje';
+
+  @override
+  String get actionLogRoundSummaryTab => 'Podsumowanie rundy';
+
+  @override
+  String get actionLogRoundSummaryEmpty => 'Brak zakończonych rund';
+
+  @override
+  String actionLogRoundLabel(int round) {
+    return 'Runda $round';
+  }
+
+  @override
+  String get actionLogRoundNoChanges => 'Brak śledzonych zmian';
+
+  @override
+  String get actionLogFigureAdded => 'Dodano';
+
+  @override
+  String get actionLogFigureRemoved => 'Usunięto';
+
+  @override
   String get menuAddNoteRow => 'Dodaj wiersz notatki';
 
   @override

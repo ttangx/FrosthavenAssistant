@@ -77,6 +77,29 @@ class AppLocalizationsZh extends AppLocalizations {
   String get actionLogRollbackConfirm => '回退';
 
   @override
+  String get actionLogActionsTab => '操作';
+
+  @override
+  String get actionLogRoundSummaryTab => '回合摘要';
+
+  @override
+  String get actionLogRoundSummaryEmpty => '尚无已完成的回合';
+
+  @override
+  String actionLogRoundLabel(int round) {
+    return '第 $round 回合';
+  }
+
+  @override
+  String get actionLogRoundNoChanges => '无已追踪的变化';
+
+  @override
+  String get actionLogFigureAdded => '已添加';
+
+  @override
+  String get actionLogFigureRemoved => '已移除';
+
+  @override
   String get menuAddNoteRow => '添加备注行';
 
   @override
@@ -1219,6 +1242,29 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get actionLogRollbackConfirm => '回退';
+
+  @override
+  String get actionLogActionsTab => '操作';
+
+  @override
+  String get actionLogRoundSummaryTab => '回合摘要';
+
+  @override
+  String get actionLogRoundSummaryEmpty => '尚無已完成的回合';
+
+  @override
+  String actionLogRoundLabel(int round) {
+    return '第 $round 回合';
+  }
+
+  @override
+  String get actionLogRoundNoChanges => '無已追蹤的變更';
+
+  @override
+  String get actionLogFigureAdded => '已新增';
+
+  @override
+  String get actionLogFigureRemoved => '已移除';
 
   @override
   String get menuAddNoteRow => '新增備註列';

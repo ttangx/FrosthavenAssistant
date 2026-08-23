@@ -245,6 +245,48 @@ abstract class AppLocalizations {
   /// **'Roll back'**
   String get actionLogRollbackConfirm;
 
+  /// No description provided for @actionLogActionsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get actionLogActionsTab;
+
+  /// No description provided for @actionLogRoundSummaryTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Round Summary'**
+  String get actionLogRoundSummaryTab;
+
+  /// No description provided for @actionLogRoundSummaryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No completed rounds yet'**
+  String get actionLogRoundSummaryEmpty;
+
+  /// No description provided for @actionLogRoundLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round}'**
+  String actionLogRoundLabel(int round);
+
+  /// No description provided for @actionLogRoundNoChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'No tracked changes'**
+  String get actionLogRoundNoChanges;
+
+  /// No description provided for @actionLogFigureAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get actionLogFigureAdded;
+
+  /// No description provided for @actionLogFigureRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed'**
+  String get actionLogFigureRemoved;
+
   /// No description provided for @menuAddNoteRow.
   ///
   /// In en, this message translates to:

@@ -78,6 +78,29 @@ class AppLocalizationsRu extends AppLocalizations {
   String get actionLogRollbackConfirm => 'Откатить';
 
   @override
+  String get actionLogActionsTab => 'Действия';
+
+  @override
+  String get actionLogRoundSummaryTab => 'Итоги раунда';
+
+  @override
+  String get actionLogRoundSummaryEmpty => 'Завершённых раундов пока нет';
+
+  @override
+  String actionLogRoundLabel(int round) {
+    return 'Раунд $round';
+  }
+
+  @override
+  String get actionLogRoundNoChanges => 'Нет отслеживаемых изменений';
+
+  @override
+  String get actionLogFigureAdded => 'Добавлен';
+
+  @override
+  String get actionLogFigureRemoved => 'Удалён';
+
+  @override
   String get menuAddNoteRow => 'Добавить строку заметки';
 
   @override

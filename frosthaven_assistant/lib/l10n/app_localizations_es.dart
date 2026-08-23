@@ -77,6 +77,29 @@ class AppLocalizationsEs extends AppLocalizations {
   String get actionLogRollbackConfirm => 'Revertir';
 
   @override
+  String get actionLogActionsTab => 'Acciones';
+
+  @override
+  String get actionLogRoundSummaryTab => 'Resumen de ronda';
+
+  @override
+  String get actionLogRoundSummaryEmpty => 'Aún no hay rondas completadas';
+
+  @override
+  String actionLogRoundLabel(int round) {
+    return 'Ronda $round';
+  }
+
+  @override
+  String get actionLogRoundNoChanges => 'No hay cambios registrados';
+
+  @override
+  String get actionLogFigureAdded => 'Añadido';
+
+  @override
+  String get actionLogFigureRemoved => 'Eliminado';
+
+  @override
   String get menuAddNoteRow => 'Añadir fila de nota';
 
   @override
