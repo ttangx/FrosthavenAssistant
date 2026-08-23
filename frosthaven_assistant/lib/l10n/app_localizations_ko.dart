@@ -77,6 +77,29 @@ class AppLocalizationsKo extends AppLocalizations {
   String get actionLogRollbackConfirm => '되돌리기';
 
   @override
+  String get actionLogActionsTab => '행동';
+
+  @override
+  String get actionLogRoundSummaryTab => '라운드 요약';
+
+  @override
+  String get actionLogRoundSummaryEmpty => '완료된 라운드가 없습니다';
+
+  @override
+  String actionLogRoundLabel(int round) {
+    return '라운드 $round';
+  }
+
+  @override
+  String get actionLogRoundNoChanges => '기록된 변경 사항 없음';
+
+  @override
+  String get actionLogFigureAdded => '추가됨';
+
+  @override
+  String get actionLogFigureRemoved => '제거됨';
+
+  @override
   String get menuAddNoteRow => '메모 행 추가';
 
   @override

@@ -1,32 +1,39 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:frosthaven_assistant/Resource/round_summary.dart';
+import 'package:frosthaven_assistant/Resource/settings.dart';
 import 'package:frosthaven_assistant/Resource/ui_utils.dart';
 import 'package:frosthaven_assistant/l10n/app_localizations.dart';
 
 import '../../Resource/state/game_state.dart';
 import '../../services/service_locator.dart';
 import '../widgets/modal_background.dart';
+import 'round_summary_tab.dart';
 
-/// Read-only viewer for the most recent actions. The action history is already
-/// tracked for undo/redo: [GameState.commandDescriptions] holds the localized
-/// description of each action (captured when it ran) and [GameState.commandIndex]
-/// marks the current position. This lists the applied actions, newest first.
+/// Read-only viewer for recent actions and completed-round net changes.
 class ActionLogMenu extends StatelessWidget {
   static const double _kMenuWidth = 360.0;
-  static const double _kMaxHeight = 420.0;
+  static const double _kMenuHeight = 500.0;
   static const int _kMaxEntries = 20;
 
-  const ActionLogMenu({super.key, this.gameState});
+  const ActionLogMenu({super.key, this.gameState, this.roundSummaries});
 
   final GameState? gameState;
 
-  /// Confirms, then rolls the game back so [targetIndex] is the most recent
-  /// applied action, undoing the [count] actions after it. Uses the existing
-  /// undo path (so it stays in sync with multiplayer); the undone actions
-  /// remain redoable until a new action is taken.
-  Future<void> _confirmRollback(BuildContext context, GameState gs,
-      int targetIndex, int count, String description, AppLocalizations l10n) async {
+  /// Optional prebuilt summaries, primarily useful when embedding or testing
+  /// the menu. Normal app usage derives these from [gameState] history.
+  final List<RoundSummary>? roundSummaries;
+
+  /// Confirms, then rolls the game back by [count] actions. The existing undo
+  /// path keeps multiplayer in sync.
+  Future<void> _confirmRollback(
+    BuildContext context,
+    GameState gameState,
+    int count,
+    String description,
+    AppLocalizations l10n,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -45,117 +52,176 @@ class ActionLogMenu extends StatelessWidget {
       ),
     );
     if (confirmed != true) return;
-    for (int k = 0; k < count; k++) {
-      gs.undo();
+    for (int index = 0; index < count; index++) {
+      gameState.undo();
     }
-    // Close the log so the rolled-back board is visible.
     if (context.mounted) Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final gs = gameState ?? getIt<GameState>();
-    final double scale = getModalMenuScale(context);
+    final scale = getModalMenuScale(context);
     final l10n = AppLocalizations.of(context)!;
+    final availableHeight = MediaQuery.sizeOf(context).height - 32;
+    final height = min(_kMenuHeight * scale, availableHeight);
 
     return ModalBackground(
       width: _kMenuWidth * scale,
+      height: height,
       child: ValueListenableBuilder<int>(
         valueListenable: gs.commandIndex,
         builder: (context, index, child) {
-          final descriptions = gs.commandDescriptions;
-          // Applied actions are indices 0..index (inclusive); index == -1 means
-          // nothing has happened yet.
-          final int appliedCount = min(index + 1, descriptions.length);
-          final int start = max(0, appliedCount - _kMaxEntries);
-
-          final rows = <Widget>[];
-          // Newest first.
-          for (int i = appliedCount - 1; i >= start; i--) {
-            final bool isCurrent = i == appliedCount - 1;
-            // Rolling back to the current (top) entry is a no-op.
-            final int count = index - i;
-            rows.add(InkWell(
-              onTap: count <= 0
-                  ? null
-                  : () => _confirmRollback(
-                      context, gs, i, count, descriptions[i], l10n),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 3 * scale),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 28 * scale,
-                      child: Text(
-                        '${i + 1}.',
-                        style: getButtonTextStyle(scale)
-                            .copyWith(color: Colors.white54),
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        descriptions[i],
-                        style: getButtonTextStyle(scale).copyWith(
-                          fontWeight:
-                              isCurrent ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+          final summaries = roundSummaries ?? buildRoundSummaries(gs);
+          return DefaultTabController(
+            length: 2,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                14 * scale,
+                10 * scale,
+                14 * scale,
+                8 * scale,
               ),
-            ));
-          }
-
-          return Padding(
-            padding: EdgeInsets.all(14 * scale),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(l10n.actionLogTitle,
-                    style: getTitleTextStyle(scale),
-                    textAlign: TextAlign.center),
-                if (rows.isNotEmpty)
-                  Padding(
-                    padding: EdgeInsets.only(top: 2 * scale),
-                    child: Text(l10n.actionLogRollbackHint,
-                        style: getButtonTextStyle(scale)
-                            .copyWith(color: Colors.white54),
-                        textAlign: TextAlign.center),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TabBar(
+                    labelStyle: getSmallTextStyle(
+                      scale,
+                    ).copyWith(fontWeight: FontWeight.bold),
+                    unselectedLabelStyle: getSmallTextStyle(scale),
+                    indicatorColor: _accentColor,
+                    tabs: [
+                      Tab(text: l10n.actionLogActionsTab),
+                      Tab(text: l10n.actionLogRoundSummaryTab),
+                    ],
                   ),
-                SizedBox(height: 10 * scale),
-                if (rows.isEmpty)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20 * scale),
-                    child: Text(l10n.actionLogEmpty,
-                        style: getButtonTextStyle(scale),
-                        textAlign: TextAlign.center),
-                  )
-                else
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: _kMaxHeight * scale),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: rows,
-                      ),
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        _ActionsTab(
+                          gameState: gs,
+                          commandIndex: index,
+                          scale: scale,
+                          onRollback: (count, description) => _confirmRollback(
+                            context,
+                            gs,
+                            count,
+                            description,
+                            l10n,
+                          ),
+                        ),
+                        RoundSummaryTab(summaries: summaries, scale: scale),
+                      ],
                     ),
                   ),
-                SizedBox(height: 8 * scale),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text(l10n.close, style: getButtonTextStyle(scale)),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(l10n.close, style: getButtonTextStyle(scale)),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
       ),
+    );
+  }
+}
+
+bool get _isDarkMode => getIt<Settings>().darkMode.value;
+
+Color get _accentColor =>
+    _isDarkMode ? Colors.lightBlueAccent : Colors.lightBlue.shade800;
+
+Color get _mutedColor => _isDarkMode ? Colors.white60 : Colors.black54;
+
+class _ActionsTab extends StatelessWidget {
+  const _ActionsTab({
+    required this.gameState,
+    required this.commandIndex,
+    required this.scale,
+    required this.onRollback,
+  });
+
+  final GameState gameState;
+  final int commandIndex;
+  final double scale;
+  final void Function(int count, String description) onRollback;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final descriptions = gameState.commandDescriptions;
+    final appliedCount = min(commandIndex + 1, descriptions.length);
+    final start = max(0, appliedCount - ActionLogMenu._kMaxEntries);
+    final entries = <Widget>[];
+
+    for (int index = appliedCount - 1; index >= start; index--) {
+      final isCurrent = index == appliedCount - 1;
+      final count = commandIndex - index;
+      entries.add(
+        InkWell(
+          onTap: count <= 0
+              ? null
+              : () => onRollback(count, descriptions[index]),
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 4 * scale),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 28 * scale,
+                  child: Text(
+                    '${index + 1}.',
+                    style: getSmallTextStyle(
+                      scale,
+                    ).copyWith(color: _mutedColor),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    descriptions[index],
+                    style: getSmallTextStyle(scale).copyWith(
+                      fontWeight: isCurrent
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (entries.isNotEmpty)
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8 * scale),
+            child: Text(
+              l10n.actionLogRollbackHint,
+              style: getSmallTextStyle(scale).copyWith(color: _mutedColor),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        Expanded(
+          child: entries.isEmpty
+              ? Center(
+                  child: Text(
+                    l10n.actionLogEmpty,
+                    style: getSmallTextStyle(scale),
+                  ),
+                )
+              : ListView(children: entries),
+        ),
+      ],
     );
   }
 }

@@ -77,6 +77,29 @@ class AppLocalizationsTh extends AppLocalizations {
   String get actionLogRollbackConfirm => 'ย้อนกลับ';
 
   @override
+  String get actionLogActionsTab => 'การกระทำ';
+
+  @override
+  String get actionLogRoundSummaryTab => 'สรุปรอบ';
+
+  @override
+  String get actionLogRoundSummaryEmpty => 'ยังไม่มีรอบที่จบแล้ว';
+
+  @override
+  String actionLogRoundLabel(int round) {
+    return 'รอบที่ $round';
+  }
+
+  @override
+  String get actionLogRoundNoChanges => 'ไม่มีการเปลี่ยนแปลงที่ติดตาม';
+
+  @override
+  String get actionLogFigureAdded => 'เพิ่มแล้ว';
+
+  @override
+  String get actionLogFigureRemoved => 'ลบแล้ว';
+
+  @override
   String get menuAddNoteRow => 'เพิ่มแถวบันทึก';
 
   @override
