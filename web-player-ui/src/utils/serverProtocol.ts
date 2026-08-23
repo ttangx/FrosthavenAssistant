@@ -58,6 +58,10 @@ interface RawGameState {
  * Filters currentList to only player characters (items with characterState).
  */
 export function parseServerGameState(raw: RawGameState): GameState {
+  const trapDamage = 2 + raw.level;
+  const hazardDamage = 1 + Math.ceil(raw.level / 3);
+  const coinMultiplier = raw.level === 7 ? 6 : 2 + Math.floor(raw.level / 2);
+
   const characters: Character[] = raw.currentList
     .filter((item) => item.characterState != null)
     .map((item) => {
@@ -108,8 +112,8 @@ export function parseServerGameState(raw: RawGameState): GameState {
     currentTurn: null,
     scenarioName: raw.scenario,
     scenarioLevel: raw.level,
-    trapDamage: 0,
-    hazardDamage: 0,
-    coinMultiplier: 0,
+    trapDamage,
+    hazardDamage,
+    coinMultiplier,
   };
 }
