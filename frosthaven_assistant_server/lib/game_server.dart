@@ -23,21 +23,8 @@ abstract class GameServer {
   // "Client left." does not overwrite the rejection message.
   final Set<Socket> _rejectedClients = {};
 
-  ServerSocket? _serverSocket;
-  ServerSocket? get serverSocket {
-    return _serverSocket;
-  }
-  set serverSocket(ServerSocket? value){
-    _serverSocket = value;
-  }
-
-  bool _serverEnabled = false;
-  bool get serverEnabled {
-    return _serverEnabled;
-  }
-  set serverEnabled(bool value){
-    _serverEnabled = value;
-  }
+  ServerSocket? serverSocket;
+  bool serverEnabled = false;
 
 
   void resetState();

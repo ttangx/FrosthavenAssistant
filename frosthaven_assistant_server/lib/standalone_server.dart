@@ -1,5 +1,4 @@
 
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:frosthaven_assistant_server/command_processor.dart';
@@ -31,7 +30,7 @@ class StandaloneServer extends GameServer {
   /// Returns true if the command was applied successfully.
   bool applyWebCommand(Map<String, dynamic> command, String description) {
     final currentState = _state.gameSaveStates.isNotEmpty
-        ? _state.gameSaveStates.last!.getState()
+        ? _state.gameSaveStates.last.getState()
         : '';
 
     final newState = applyCommand(command, currentState);
@@ -312,6 +311,7 @@ class StandaloneServer extends GameServer {
     }
   }
 
+  @override
   String safeGetClientAddress(Socket client){
     try{
       return "Client ${client.remoteAddress}:${client.remotePort}";

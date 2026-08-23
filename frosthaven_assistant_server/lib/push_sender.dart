@@ -23,7 +23,7 @@ Future<bool> sendPushNotification(
   final script = '''
 const wp = require("web-push");
 wp.setVapidDetails("mailto:admin@epicbroccoli.com", ${jsonEncode(publicKey)}, ${jsonEncode(privateKey)});
-wp.sendNotification(${subscriptionJson}, ${jsonEncode(payload)})
+wp.sendNotification($subscriptionJson, ${jsonEncode(payload)})
   .then(() => console.log("Push sent"))
   .catch(e => { console.error("Push failed:", e.statusCode || e.message); process.exit(1); });
 ''';
