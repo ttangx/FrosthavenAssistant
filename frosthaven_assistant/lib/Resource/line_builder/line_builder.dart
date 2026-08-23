@@ -4,12 +4,43 @@ import 'package:frosthaven_assistant/Resource/enums.dart';
 import 'package:frosthaven_assistant/Resource/line_builder/frosthaven_converter.dart';
 import 'package:frosthaven_assistant/Resource/line_builder/line_styles.dart';
 import 'package:frosthaven_assistant/Resource/line_builder/stat_applier.dart';
+import 'package:frosthaven_assistant/Resource/settings.dart';
 import 'package:frosthaven_assistant/Resource/ui_utils.dart';
 
 import '../game_methods.dart';
 import '../state/game_state.dart';
 import '../../services/service_locator.dart';
 import '../../services/translation_service.dart';
+
+/// Matches "advantage" as a whole word, so it does not also match inside
+/// "disadvantage". Compiled once: [LineBuilder.createLines] evaluates this per
+/// line, per card render.
+final RegExp _advantageWord = RegExp(r'\badvantage\b');
+
+/// Whether [line] should get the looping colorize shimmer.
+///
+/// [animate] carries the user's "Stat card text shimmers" setting, which is off
+/// by default on mobile. It stays authoritative here: a shimmer is a
+/// forever-repeating animation, and any line that opts in keeps the app
+/// rendering continuously, so nothing may override the user's choice.
+bool shouldAnimateLine(String line, Monster? monster, bool animate,
+    {Settings? settings}) {
+  if (!animate ||
+      monster == null ||
+      !monster.isActive ||
+      reducePowerEnabled(settings: settings) ||
+      // Nothing is visible behind the dim scrim, so a forever-repeating
+      // animation there is pure cost. IdleDimmer rebuilds the tree on wake.
+      isDimmed.value) {
+    return false;
+  }
+  final String lower = line.toLowerCase();
+  return lower.contains('disadvantage') ||
+      line.contains('retaliate') ||
+      line.contains('shield') ||
+      (monster.turnState.value == TurnsState.current &&
+          _advantageWord.hasMatch(lower));
+}
 
 class LineBuilder {
   static const bool debugColors = false;
@@ -359,7 +390,7 @@ class LineBuilder {
           scale: 1.0 / (scale * scaleConstant),
           //for some reason flutter likes scale to be inverted
           fit: BoxFit.fitHeight,
-          filterQuality: FilterQuality.medium,
+          filterQuality: powerAwareFilterQuality(),
           semanticLabel: line.substring(1),
           "assets/images/abilities/${line.substring(1)}.png",
         );
@@ -407,7 +438,7 @@ class LineBuilder {
                   : _kDividerImageHeight * scale,
               width: _kDividerImageWidth *
                   scale, //actually 40, but some layout might depend on wider size so not changing now
-              filterQuality: FilterQuality.medium,
+              filterQuality: powerAwareFilterQuality(),
               semanticLabel: "divider",
               alignment == CrossAxisAlignment.start
                   ? "assets/images/abilities/divider_boss_fh.png"
@@ -507,7 +538,7 @@ class LineBuilder {
                                     _kUseFHHeightRatio
                                 : (styleToUse.fontSize ?? 0.0) * _kUseGHRatio,
                             fit: BoxFit.fitHeight,
-                            filterQuality: FilterQuality.medium,
+                            filterQuality: powerAwareFilterQuality(),
                             semanticLabel: iconGfx,
                             image: AssetImage(
                                 "assets/images/abilities/${iconGfx + imageSuffix}.png"),
@@ -532,18 +563,8 @@ class LineBuilder {
                   iconTokenText =
                       getIt<TranslationService>().t(iconTokenText);
                   //TODO: add animation on other texts too? and need to animate icons as well then for FH style
-                  bool shouldAnimate = animate &&
-                      monster != null &&
-                      (line.toLowerCase().contains('disadvantage') ||
-                          line.contains('retaliate') ||
-                          line.contains('shield')) &&
-                      monster.isActive;
-                  if (monster != null &&
-                      monster.turnState.value == TurnsState.current) {
-                    if (line.toLowerCase().contains("advantage")) {
-                      shouldAnimate = true;
-                    }
-                  }
+                  bool shouldAnimate =
+                      shouldAnimateLine(line, monster, animate);
 
                   textPartListRowContent.add(Container(
                       color: debugColors ? Colors.red : null,
@@ -590,7 +611,7 @@ class LineBuilder {
                 // isAntiAlias: true,
                 //this causes lines to have variable height if height set to less than 1
                 fit: BoxFit.fitHeight,
-                filterQuality: FilterQuality.medium,
+                filterQuality: powerAwareFilterQuality(),
                 semanticLabel: iconGfx,
                 image: AssetImage(imagePath),
               );
@@ -655,17 +676,7 @@ class LineBuilder {
       }
 
       //TODO: add animation on other texts too? and need to animate icons as well then for FH style
-      bool shouldAnimate = animate &&
-          monster != null &&
-          (line.toLowerCase().contains('disadvantage') ||
-              line.contains('retaliate') ||
-              line.contains('shield')) &&
-          monster.isActive;
-      if (monster != null && monster.turnState.value == TurnsState.current) {
-        if (line.toLowerCase().contains("advantage")) {
-          shouldAnimate = true;
-        }
-      }
+      bool shouldAnimate = shouldAnimateLine(line, monster, animate);
 
       if (partStartIndex < line.length) {
         String textPart = line.substring(partStartIndex, line.length);

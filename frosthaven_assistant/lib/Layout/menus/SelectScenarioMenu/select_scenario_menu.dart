@@ -89,7 +89,8 @@ class SelectScenarioMenuState extends State<SelectScenarioMenu> {
       _gameState.action(SetCampaignCommand(campaign));
     }
     _foundScenarios =
-        modelData[_gameState.currentCampaign.value]!.scenarios.keys.toList();
+        modelData[_gameState.currentCampaign.value]?.scenarios.keys.toList() ??
+        [];
 
     //special hack for solo BladeSwarm and Vanquisher
     if (campaign == "Solo" || campaign == "Trail of Ashes") {
@@ -117,10 +118,13 @@ class SelectScenarioMenuState extends State<SelectScenarioMenu> {
         strings[0] = strings.first.replaceFirst(" ", "Å");
         String characterName = strings.first.split("Å")[1];
         characterName = characterName.split("/").first;
-        if (_gameData.modelData.value.entries.any((element) =>
-            GameMethods.isCustomCampaign(element.value.edition) &&
-            element.value.characters
-                .any((element) => element.name == characterName))) {
+        if (_gameData.modelData.value.entries.any(
+          (element) =>
+              GameMethods.isCustomCampaign(element.value.edition) &&
+              element.value.characters.any(
+                (element) => element.name == characterName,
+              ),
+        )) {
           return true;
         }
 
@@ -151,16 +155,21 @@ class SelectScenarioMenuState extends State<SelectScenarioMenu> {
     final String campaign = _gameState.currentCampaign.value;
     if (enteredKeyword.isEmpty) {
       // if the search field is empty or only contains white-space, we'll display all
-      results = _gameData.modelData.value[campaign]!.scenarios.keys.toList();
+      results =
+          _gameData.modelData.value[campaign]?.scenarios.keys.toList() ?? [];
       if (campaign != "Solo") {
         results.insert(0, "custom");
       }
     } else {
-      results = _gameData.modelData.value[campaign]!.scenarios.keys
-          .toList()
-          .where((user) =>
-              user.toLowerCase().contains(enteredKeyword.toLowerCase()))
-          .toList();
+      results =
+          _gameData.modelData.value[campaign]?.scenarios.keys
+              .toList()
+              .where(
+                (user) =>
+                    user.toLowerCase().contains(enteredKeyword.toLowerCase()),
+              )
+              .toList() ??
+          [];
       results.sort((a, b) {
         double? aNr = findNrFromScenarioName(a);
         double? bNr = findNrFromScenarioName(b);
@@ -205,91 +214,108 @@ class SelectScenarioMenuState extends State<SelectScenarioMenu> {
       if (scenarioList != null && scenarioList.isNotEmpty) {
         if (_settings.showCustomContent.value ||
             !GameMethods.isCustomCampaign(item)) {
-          retVal.add(TextButton(
+          retVal.add(
+            TextButton(
               onPressed: () {
                 setState(() {
                   setCampaign(item);
                 });
               },
-              child: Text(item)));
+              child: Text(item),
+            ),
+          );
         }
       }
     }
-    return [
-      Wrap(
-        children: retVal,
-      )
-    ];
+    return [Wrap(children: retVal)];
   }
 
   @override
   Widget build(BuildContext context) {
     return MenuCard(
-        cardMargin: const EdgeInsets.all(_kCardMargin),
-        child: Column(
-          children: [
-            const SizedBox(height: kMenuTopPadding),
-            Column(children: [
-              Text(AppLocalizations.of(context)!.menuSetScenario,
-                  style: kTitleStyle),
+      cardMargin: const EdgeInsets.all(_kCardMargin),
+      child: Column(
+        children: [
+          const SizedBox(height: kMenuTopPadding),
+          Column(
+            children: [
+              Text(
+                AppLocalizations.of(context)!.menuSetScenario,
+                style: kTitleStyle,
+              ),
               ExpansionTile(
                 key: UniqueKey(),
                 title: Text(
-                    AppLocalizations.of(context)!.currentCampaign(_gameState.currentCampaign.value)),
+                  AppLocalizations.of(
+                    context,
+                  )!.currentCampaign(_gameState.currentCampaign.value),
+                ),
                 children: buildCampaignButtons(),
               ),
-            ]),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: _kSearchPadding),
-              child: KeyboardListener(
-                  //needed to trigger onEditingComplete on enter
-                  //TODO: add this to the other menus
-                  focusNode: FocusNode(),
-                  child: TextField(
-                    onChanged: (value) => _runFilter(value),
-                    controller: _controller,
-                    onTap: () {
-                      _controller.clear();
-                      if (_settings.softNumpadInput.value) {
-                        openDialog(
-                            context,
-                            NumpadMenu(
-                                controller: _controller,
-                                maxLength: _kNumpadMaxLength,
-                                onChange: (String value) {
-                                  _runFilter(value);
-                                }));
-                      }
-                    },
-                    onEditingComplete: () {
-                      if (_foundScenarios.isNotEmpty) {
-                        Navigator.pop(context);
-                        _gameState.action(SetScenarioCommand(
-                            _foundScenarios.first, false,
-                            gameState: _gameState));
-                      }
-                    },
-                    decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.menuSetScenario,
-                        suffixIcon: const Icon(Icons.search)),
-                  )),
+            ],
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: _kSearchPadding),
+            child: KeyboardListener(
+              //needed to trigger onEditingComplete on enter
+              //TODO: add this to the other menus
+              focusNode: FocusNode(),
+              child: TextField(
+                onChanged: (value) => _runFilter(value),
+                controller: _controller,
+                onTap: () {
+                  _controller.clear();
+                  if (_settings.softNumpadInput.value) {
+                    openDialog(
+                      context,
+                      NumpadMenu(
+                        controller: _controller,
+                        maxLength: _kNumpadMaxLength,
+                        onChange: (String value) {
+                          _runFilter(value);
+                        },
+                      ),
+                    );
+                  }
+                },
+                onEditingComplete: () {
+                  if (_foundScenarios.isNotEmpty) {
+                    Navigator.pop(context);
+                    _gameState.action(
+                      SetScenarioCommand(
+                        _foundScenarios.first,
+                        false,
+                        gameState: _gameState,
+                      ),
+                    );
+                  }
+                },
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.menuSetScenario,
+                  suffixIcon: const Icon(Icons.search),
+                ),
+              ),
             ),
-            const SizedBox(height: kMenuTopPadding),
-            FilteredListView(
-              items: _foundScenarios,
-              itemBuilder: (context, index) =>
-                  _gameState.currentCampaign.value == "Solo"
-                      ? SoloTile(
-                          name: _foundScenarios[index],
-                          gameState: _gameState,
-                          gameData: _gameData)
-                      : ScenarioTile(
-                          name: _foundScenarios[index],
-                          gameState: _gameState,
-                          settings: _settings),
-            ),
-            const SizedBox(height: kMenuCloseButtonSpacing),
-          ],
-        ));
+          ),
+          const SizedBox(height: kMenuTopPadding),
+          FilteredListView(
+            items: _foundScenarios,
+            itemBuilder: (context, index) =>
+                _gameState.currentCampaign.value == "Solo"
+                ? SoloTile(
+                    name: _foundScenarios[index],
+                    gameState: _gameState,
+                    gameData: _gameData,
+                  )
+                : ScenarioTile(
+                    name: _foundScenarios[index],
+                    gameState: _gameState,
+                    settings: _settings,
+                  ),
+          ),
+          const SizedBox(height: kMenuCloseButtonSpacing),
+        ],
+      ),
+    );
   }
 }

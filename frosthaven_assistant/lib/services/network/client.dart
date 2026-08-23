@@ -18,6 +18,14 @@ import 'connection.dart';
 class Client {
   String _leftOverMessage = "";
   bool _serverResponsive = true;
+
+  // Consecutive ping windows the server has failed to answer. A single missed
+  // pong is usually just a transient network hiccup, so tolerate a few before
+  // treating the server as gone — dropping on the first miss disconnected
+  // players too eagerly on flaky wifi.
+  int _missedPongs = 0;
+  static const int _maxMissedPongs = 2;
+
   bool _connectCancelled = false;
   final GameState _gameState;
   final Communication _communication;
@@ -53,7 +61,14 @@ class Client {
 
   Future<void> connect(String address) async {
     _serverResponsive = true;
+    _missedPongs = 0;
     _connectCancelled = false;
+    _pingGeneration++;
+    // Bumping the generation retires any chain from a previous connection, so
+    // the old chain can no longer stand in for this one — clear the re-entrancy
+    // guard too, or a reconnect that happens without an intervening _cleanup()
+    // would end up with no ping chain at all.
+    _pinging = false;
     try {
       int port = int.parse(_settings.lastKnownPort);
       debugPrint("port nr: ${port.toString()}");
@@ -104,21 +119,52 @@ class Client {
 
   bool _pinging =
       false; //to not restart this ping sub process, if one is running
+
+  /// Bumped whenever a connection starts or ends. A scheduled ping captures the
+  /// value it was created under and drops out if it no longer matches, so a
+  /// pending [Future.delayed] left over from a previous connection cannot
+  /// attach itself to the next one.
+  ///
+  /// Without this, resuming from background produces two concurrent ping chains
+  /// on one socket: the thawed chain from the old connection plus the one
+  /// started by reconnect-on-resume. Beyond the doubled traffic, the two race
+  /// on [_serverResponsive] — one clears it, the other's pong sets it — which
+  /// makes the unresponsive-server watchdog unable to fire correctly at all.
+  int _pingGeneration = 0;
+
   void _sendPing() {
     if (_connection.established() &&
         _settings.client.value == ClientState.connected &&
         !_pinging) {
       _pinging = true;
+      final int generation = _pingGeneration;
       Future.delayed(const Duration(seconds: 12), () {
-        if (_serverResponsive) {
-          _communication.sendToAll("ping");
-          _serverResponsive = false; //set back to true when get response
-          _pinging = false;
-          _sendPing();
-        } else {
-          _pinging = false;
-          disconnect(_l10n.serverUnresponsive);
+        if (generation != _pingGeneration) {
+          return; //belongs to a connection that has since been replaced
         }
+        _pinging = false;
+        // Skip the ping while backgrounded: waking the radio every 12s is
+        // disproportionately expensive on battery, and the watchdog below
+        // would otherwise fire on a socket the OS has frozen and force a
+        // spurious "server unresponsive" disconnect. Reschedule regardless so
+        // the chain is still alive when the app comes back to the foreground.
+        if (_network.appInBackground) {
+          _serverResponsive = true;
+          _sendPing();
+          return;
+        }
+        if (_serverResponsive) {
+          _missedPongs = 0;
+        } else {
+          _missedPongs++;
+          if (_missedPongs >= _maxMissedPongs) {
+            disconnect(_l10n.serverUnresponsive);
+            return;
+          }
+        }
+        _communication.sendToAll("ping");
+        _serverResponsive = false; //set back to true when get response
+        _sendPing();
       });
     }
   }
@@ -200,6 +246,7 @@ class Client {
       _send("pong");
     } else if (message.startsWith("pong")) {
       _serverResponsive = true;
+      _missedPongs = 0;
     }
   }
 
@@ -225,6 +272,8 @@ class Client {
     _gameState.resetCommandHistory();
     _leftOverMessage = "";
     _pinging = false;
+    _pingGeneration++;
+    _missedPongs = 0;
 
     if (_network.appInBackground) {
       _network.clientDisconnectedWhileInBackground = true;
