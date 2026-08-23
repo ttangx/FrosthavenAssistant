@@ -20,6 +20,7 @@ export interface MonsterInstance {
 export interface Monster {
   id: string;
   turnState: number;
+  isActive: boolean;
   level: number;
   instances: MonsterInstance[];
 }

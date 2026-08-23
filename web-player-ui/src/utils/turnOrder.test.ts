@@ -35,6 +35,7 @@ const gameState: GameState = {
     {
       id: 'Algox Guard',
       turnState: 1,
+      isActive: true,
       level: 2,
       instances: [
         { standeeNr: 1, type: 1, health: 8 },
@@ -44,6 +45,7 @@ const gameState: GameState = {
     {
       id: 'Unresolved Monster',
       turnState: 0,
+      isActive: true,
       level: 2,
       instances: [{ standeeNr: 4, type: 1, health: 5 }],
     },
@@ -92,5 +94,19 @@ describe('buildTurnOrder', () => {
       { kind: 'monster', name: 'Algox Guard', initiative: 22 },
       { kind: 'character', name: 'Blinkblade', initiative: 46 },
     ]);
+  });
+
+  it('omits inactive monster groups with stale drawn cards', () => {
+    const inactiveState = {
+      ...gameState,
+      monsters: [{
+        ...gameState.monsters[0],
+        isActive: false,
+      }],
+    } as GameState;
+
+    const rows = buildTurnOrder(inactiveState, abilityData);
+
+    expect(rows.some((row) => row.kind === 'monster')).toBe(false);
   });
 });

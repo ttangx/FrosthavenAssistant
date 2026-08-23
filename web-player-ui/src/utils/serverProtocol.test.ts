@@ -41,4 +41,19 @@ describe('parseServerGameState', () => {
       coinMultiplier: 6,
     });
   });
+
+  it('preserves whether a monster group is active', () => {
+    const state = parseServerGameState({
+      ...stateAtLevel(2),
+      currentList: [{
+        id: 'Algox Guard',
+        turnState: 0,
+        edition: 'Frosthaven',
+        isActive: false,
+        monsterInstances: [],
+      }],
+    });
+
+    expect(state.monsters[0].isActive).toBe(false);
+  });
 });

@@ -38,6 +38,7 @@ interface RawCharacterState {
 interface RawListItem {
   id: string; // Class name (e.g. "Frozen Fist")
   turnState: number;
+  isActive?: boolean;
   edition: string;
   characterState?: RawCharacterState;
   monsterInstances?: unknown;
@@ -84,16 +85,21 @@ export function parseServerGameState(raw: RawGameState): GameState {
 
   const monsters: Monster[] = raw.currentList
     .filter((item) => item.monsterInstances != null)
-    .map((item) => ({
-      id: item.id,
-      turnState: item.turnState,
-      level: (item as any).level ?? 0,
-      instances: ((item as any).monsterInstances ?? []).map((mi: any) => ({
+    .map((item) => {
+      const instances = ((item as any).monsterInstances ?? []).map((mi: any) => ({
         standeeNr: mi.standeeNr,
         type: mi.type,
         health: mi.health,
-      })),
-    }));
+      }));
+
+      return {
+        id: item.id,
+        turnState: item.turnState,
+        isActive: item.isActive ?? instances.length > 0,
+        level: (item as any).level ?? 0,
+        instances,
+      };
+    });
 
   const abilityDecks: AbilityDeck[] = ((raw as any).currentAbilityDecks ?? []).map((d: any) => ({
     name: d.name,

@@ -17,7 +17,7 @@ export function getMonsterAbilityRows(
   gameState: GameState,
   abilityData: AbilityData,
 ): MonsterAbilityRow[] {
-  return gameState.monsters.flatMap((monster) => {
+  return gameState.monsters.filter((monster) => monster.isActive).flatMap((monster) => {
     const deckName = abilityData.monsters[monster.id] ?? monster.id;
     const deck = gameState.abilityDecks.find((item) => item.name === deckName);
     const cardNumber = deck && deck.discardPile.length > 0
