@@ -45,7 +45,12 @@ class StandaloneServer extends GameServer {
     _state.save(newState);
 
     // Broadcast to ALL clients (TCP + WebSocket via onStateBroadcast)
-    final message = "Index:${_state.commandIndex}Description:${description}GameState:${_state.gameSaveStates.last!.getState()}";
+    final message = GameServer.encodeStateEnvelope(
+      index: _state.commandIndex,
+      description: description,
+      eventJson: _noEventJson,
+      state: _lastSavedState(),
+    );
     send(message);
 
     print('Web command applied: $description (index: ${_state.commandIndex})');

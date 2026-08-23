@@ -5,6 +5,7 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 
+import 'package:frosthaven_assistant_server/game_server.dart';
 import 'package:frosthaven_assistant_server/push_state.dart';
 import 'package:frosthaven_assistant_server/standalone_server.dart';
 import 'package:frosthaven_assistant_server/websocket_handler.dart';
@@ -23,9 +24,9 @@ void main() async {
   server.onStateBroadcast = (data) {
     wsHandler.broadcastToWebClients(data);
     // Check push notification conditions on state change
-    final gsIndex = data.indexOf('GameState:');
-    if (gsIndex != -1) {
-      pushState.onStateChanged(data.substring(gsIndex + 'GameState:'.length));
+    final gameState = GameServer.tryExtractState(data);
+    if (gameState != null) {
+      pushState.onStateChanged(gameState);
     }
   };
 

@@ -94,6 +94,35 @@ abstract class GameServer {
     }
   }
 
+  /// Extracts the serialized game state from a state message.
+  ///
+  /// JSON envelopes are canonical. Legacy text envelopes remain readable so
+  /// the server and browser can overlap safely during a rolling deployment.
+  static String? tryExtractState(String content) {
+    const mismatchPrefix = 'Mismatch:';
+    final message = content.startsWith(mismatchPrefix)
+        ? content.substring(mismatchPrefix.length)
+        : content;
+
+    final envelope = tryDecodeStateEnvelope(message);
+    if (envelope != null) return envelope.data;
+
+    const legacyPrefix = 'Index:';
+    const descriptionMarker = 'Description:';
+    const gameStateMarker = 'GameState:';
+    if (!message.startsWith(legacyPrefix)) return null;
+
+    final descriptionIndex = message.indexOf(descriptionMarker);
+    if (descriptionIndex == -1) return null;
+    final stateIndex = message.indexOf(
+      gameStateMarker,
+      descriptionIndex + descriptionMarker.length,
+    );
+    if (stateIndex == -1) return null;
+
+    return message.substring(stateIndex + gameStateMarker.length);
+  }
+
 
   Future<void> startServerInternal(String ip, int port) async {
     try {
