@@ -1,106 +1,35 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { GameState } from '../types';
+import { useMonsterAbilityData } from '../hooks/useMonsterAbilityData';
+import {
+  formatAbilityLine,
+} from '../utils/monsterAbilities';
+import { getMonsterAbilityRows } from '../utils/turnOrder';
 
 interface MonsterDetailsProps {
   gameState: GameState;
 }
 
-interface AbilityCard {
-  name: string;
-  initiative: number;
-  lines: string[];
-}
-
-interface AbilityData {
-  decks: Record<string, Record<string, AbilityCard>>;
-  monsters: Record<string, string>; // monsterId -> deckName
-}
-
-interface DeckRow {
-  deckName: string;
-  displayName: string;
-  card: AbilityCard;
-  isActive: boolean;
-}
-
-let cachedAbilityData: AbilityData | null = null;
-
-async function loadAbilityData(): Promise<AbilityData> {
-  if (cachedAbilityData) return cachedAbilityData;
-  const resp = await fetch('/monster-abilities.json');
-  cachedAbilityData = await resp.json();
-  return cachedAbilityData!;
-}
-
-// Strip the "(FH)", "(2e)", etc. suffix from monster/deck names for display.
-function cleanName(name: string): string {
-  return name.replace(/\s*\([^)]+\)\s*$/, '').trim();
-}
-
-// Render an ability card line: strip layout markers, replace %tokens% with words.
-function formatLine(raw: string): string {
-  let s = raw;
-  // Strip layout markers at the start of a line
-  s = s.replace(/^\^+/, '');
-  // Divider lines are just "*..." — drop them.
-  if (/^\*\.+$/.test(s.trim())) return '';
-  // Drop bare bullets/asterisks
-  s = s.replace(/^\*\s*/, '');
-  // Drop column/row brackets used for two-column layouts in source
-  s = s.replace(/\[\/?[rc]\]/g, '');
-  // Drop image tokens (e.g. ¤aoe-triangle-2-side-with-black)
-  s = s.replace(/¤[a-z0-9-]+/gi, '');
-  // Replace %word% tokens with the word (lowercased)
-  s = s.replace(/%([a-zA-Z]+)%/g, (_m, w) => w.toLowerCase());
-  return s.trim();
-}
-
 export default function MonsterDetails({ gameState }: MonsterDetailsProps) {
-  const [abilityData, setAbilityData] = useState<AbilityData | null>(null);
+  const abilityData = useMonsterAbilityData();
   const [isOpen, setIsOpen] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    loadAbilityData().then(setAbilityData).catch(() => {});
-  }, []);
-
   if (!abilityData) return null;
 
-  // Build rows: for each deck with a drawn card, look up the latest card.
-  const activeMonsterIds = new Set(
-    gameState.monsters.filter((m) => m.turnState === 1).map((m) => m.id)
-  );
-  const activeDeckNames = new Set(
-    Array.from(activeMonsterIds).map(
-      (id) => abilityData.monsters[id] ?? id
-    )
-  );
-
-  const rows: DeckRow[] = [];
-  for (const deck of gameState.abilityDecks) {
-    if (deck.discardPile.length === 0) continue;
-    const lastNr = deck.discardPile[deck.discardPile.length - 1].nr;
-    const card = abilityData.decks[deck.name]?.[String(lastNr)];
-    if (!card) continue;
-    rows.push({
-      deckName: deck.name,
-      displayName: cleanName(deck.name),
-      card,
-      isActive: activeDeckNames.has(deck.name),
-    });
-  }
+  const rows = getMonsterAbilityRows(gameState, abilityData);
 
   if (rows.length === 0) return null;
 
   // Sort by initiative ascending, then pin active rows to the top.
   rows.sort((a, b) => a.card.initiative - b.card.initiative);
-  rows.sort((a, b) => Number(b.isActive) - Number(a.isActive));
+  rows.sort((a, b) => Number(b.isCurrent) - Number(a.isCurrent));
 
-  const toggleRow = (deckName: string) => {
+  const toggleRow = (monsterId: string) => {
     setExpandedRows((prev) => {
       const next = new Set(prev);
-      if (next.has(deckName)) next.delete(deckName);
-      else next.add(deckName);
+      if (next.has(monsterId)) next.delete(monsterId);
+      else next.add(monsterId);
       return next;
     });
   };
@@ -291,14 +220,14 @@ export default function MonsterDetails({ gameState }: MonsterDetailsProps) {
       <div className={`monster-details__body${isOpen ? ' monster-details__body--open' : ''}`}>
         <div className="monster-details__list">
           {rows.map((row) => {
-            const isExpanded = expandedRows.has(row.deckName);
-            const lines = row.card.lines.map(formatLine).filter(Boolean);
+            const isExpanded = expandedRows.has(row.monsterId);
+            const lines = row.card.lines.map(formatAbilityLine).filter(Boolean);
             return (
               <button
-                key={row.deckName}
+                key={row.monsterId}
                 type="button"
-                className={`monster-row${row.isActive ? ' monster-row--active' : ''}`}
-                onClick={() => toggleRow(row.deckName)}
+                className={`monster-row${row.isCurrent ? ' monster-row--active' : ''}`}
+                onClick={() => toggleRow(row.monsterId)}
                 aria-expanded={isExpanded}
               >
                 <span className="monster-row__init">{row.card.initiative}</span>

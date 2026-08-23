@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Character, GameState } from '../types';
+import { useMonsterAbilityData } from '../hooks/useMonsterAbilityData';
+import { buildTurnOrder } from '../utils/turnOrder';
 
 interface InitiativeSectionProps {
   character: Character;
@@ -16,6 +18,7 @@ export default function InitiativeSection({
 }: InitiativeSectionProps) {
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const abilityData = useMonsterAbilityData();
 
   // roundState 0 = pre-draw (players inputting initiative), 1+ = cards drawn (turn order visible)
   const roundStarted = gameState.roundState > 0;
@@ -28,16 +31,14 @@ export default function InitiativeSection({
   );
   const isLastToEnter = !hasInitiative && othersWithInitiative.length === gameState.characters.length - 1 && gameState.characters.length > 1;
 
-  // Sort characters by initiative (ascending - lower goes first in Gloomhaven)
-  const sortedCharacters = [...gameState.characters]
-    .filter((c) => c.initiative !== null)
-    .sort((a, b) => (a.initiative ?? 99) - (b.initiative ?? 99));
-
-  const myPosition =
-    sortedCharacters.findIndex((c) => c.id === character.id) + 1;
-  const isMyTurn =
-    gameState.currentTurn !== null &&
-    sortedCharacters[gameState.currentTurn]?.id === character.id;
+  const turnOrder = abilityData
+    ? buildTurnOrder(gameState, abilityData)
+    : buildTurnOrder(gameState, { decks: {}, monsters: {} });
+  const selfRowId = `character:${character.id}`;
+  const myPosition = turnOrder.findIndex((row) => row.id === selfRowId) + 1;
+  const isMyTurn = turnOrder.some(
+    (row) => row.id === selfRowId && row.isCurrent,
+  );
 
   // Auto-focus the input when in pre-round mode
   useEffect(() => {
@@ -211,6 +212,15 @@ export default function InitiativeSection({
           border: 1px solid var(--color-frost);
         }
 
+        .turn-order__item--monster {
+          border-left: 3px solid var(--color-xp);
+          background: linear-gradient(90deg, rgba(212, 169, 64, 0.12), var(--color-panel-dark) 42%);
+        }
+
+        .turn-order__item--monster.turn-order__item--active {
+          background: linear-gradient(135deg, rgba(212, 169, 64, 0.34), rgba(120, 75, 20, 0.5));
+        }
+
         .turn-order__position {
           font-weight: 700;
           min-width: 24px;
@@ -219,6 +229,18 @@ export default function InitiativeSection({
 
         .turn-order__name {
           flex: 1;
+        }
+
+        .turn-order__type {
+          padding: 0.08rem 0.35rem;
+          border: 1px solid rgba(212, 169, 64, 0.5);
+          border-radius: 999px;
+          color: var(--color-xp);
+          font-size: 0.62rem;
+          font-weight: 700;
+          letter-spacing: 0.06em;
+          line-height: 1.35;
+          text-transform: uppercase;
         }
 
         .turn-order__initiative {
@@ -346,27 +368,30 @@ export default function InitiativeSection({
             </div>
           )}
 
-          {sortedCharacters.length > 0 && (
+          {turnOrder.length > 0 && (
             <div className="turn-order">
               <h4 className="turn-order__heading">Turn Order</h4>
               <ul className="turn-order__list">
-                {sortedCharacters.map((c, index) => {
-                  const isActive = gameState.currentTurn === index;
-                  const isSelf = c.id === character.id;
+                {turnOrder.map((row, index) => {
+                  const isSelf = row.id === selfRowId;
                   const classNames = [
                     'turn-order__item',
-                    isActive ? 'turn-order__item--active' : '',
+                    row.kind === 'monster' ? 'turn-order__item--monster' : '',
+                    row.isCurrent ? 'turn-order__item--active' : '',
                     isSelf ? 'turn-order__item--self' : '',
                   ]
                     .filter(Boolean)
                     .join(' ');
 
                   return (
-                    <li key={c.id} className={classNames}>
+                    <li key={row.id} className={classNames}>
                       <span className="turn-order__position">{index + 1}</span>
-                      <span className="turn-order__name">{c.name}</span>
+                      <span className="turn-order__name">{row.name}</span>
+                      {row.kind === 'monster' && (
+                        <span className="turn-order__type">Monster</span>
+                      )}
                       <span className="turn-order__initiative">
-                        {c.initiative}
+                        {row.initiative}
                       </span>
                     </li>
                   );
