@@ -93,3 +93,6 @@ lint/tmp/
 # generated
 **/generated_*
 **/Generated*
+
+# Task-isolated linked worktrees
+.worktrees/
