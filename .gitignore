@@ -96,3 +96,7 @@ lint/tmp/
 
 # Task-isolated linked worktrees
 .worktrees/
+
+# Local OS and browser-test artifacts
+.DS_Store
+/test-results/
